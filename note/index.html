@@ -26,7 +26,7 @@
             --border: rgba(148, 163, 184, 0.15);
             --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             
-            /* 便签颜色系统 - 加深加粗 */
+            /* 便签颜色系统 */
             --note-blue: #1e3a5f;
             --note-blue-border: #3b82f6;
             --note-green: #14532d;
@@ -52,7 +52,6 @@
             font-weight: 500;
         }
 
-        /* 背景动画效果 */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -88,7 +87,6 @@
             z-index: 1;
         }
 
-        /* 头部 */
         header {
             display: flex;
             justify-content: space-between;
@@ -143,7 +141,7 @@
             transition: all 0.3s ease;
             font-size: 20px;
             font-weight: 600;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
         }
 
         .btn-icon:hover {
@@ -153,7 +151,6 @@
             border-color: var(--accent);
         }
 
-        /* 搜索框 */
         .search-box {
             position: relative;
             margin-bottom: 24px;
@@ -192,7 +189,6 @@
             opacity: 0.7;
         }
 
-        /* 同步状态栏 */
         .sync-bar {
             background: var(--bg-card);
             border: 2px solid var(--border);
@@ -318,7 +314,6 @@
             box-shadow: none;
         }
 
-        /* 便签列表 */
         .notes-list {
             display: flex;
             flex-direction: column;
@@ -336,7 +331,6 @@
             overflow: hidden;
         }
 
-        /* 便签颜色样式 */
         .note-item.note-blue {
             background: linear-gradient(135deg, var(--note-blue) 0%, rgba(30, 58, 95, 0.8) 100%);
             border-color: var(--note-blue-border);
@@ -458,7 +452,6 @@
             font-weight: 700;
         }
 
-        /* 编辑器模态框 */
         .modal {
             display: none;
             position: fixed;
@@ -650,7 +643,6 @@
             border-color: var(--border);
         }
 
-        /* 颜色选择器 */
         .color-picker {
             display: flex;
             gap: 10px;
@@ -659,10 +651,11 @@
             border-radius: 14px;
             border: 2px solid var(--border);
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .color-label {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--text-secondary);
             font-weight: 700;
             margin-right: 8px;
@@ -709,7 +702,6 @@
         .color-pink { background: linear-gradient(135deg, #ec4899, #be185d); }
         .color-gray { background: linear-gradient(135deg, #6b7280, #374151); }
 
-        /* 提示消息 */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -729,6 +721,8 @@
             transition: all 0.3s ease;
             font-weight: 700;
             font-size: 15px;
+            max-width: 90%;
+            word-break: break-word;
         }
 
         .toast.show {
@@ -746,7 +740,6 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
         }
 
-        /* 设置面板 */
         .settings-panel {
             background: var(--bg-card);
             border: 2px solid var(--border);
@@ -782,6 +775,55 @@
             font-weight: 700;
         }
 
+        /* Token 输入框容器 */
+        .token-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .token-input-wrapper input {
+            flex: 1;
+            padding: 14px 50px 14px 18px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .token-input-wrapper input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        }
+
+        .token-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .token-toggle:hover {
+            background: var(--accent);
+            color: white;
+        }
+
         .setting-input {
             width: 100%;
             padding: 14px 18px;
@@ -808,7 +850,34 @@
             font-weight: 600;
         }
 
-        /* 响应式 */
+        .proxy-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .proxy-option {
+            padding: 8px 14px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .proxy-option:hover {
+            border-color: var(--accent);
+        }
+
+        .proxy-option.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
         @media (max-width: 640px) {
             .sync-bar {
                 flex-direction: column;
@@ -840,12 +909,10 @@
             }
 
             .color-picker {
-                flex-wrap: wrap;
                 justify-content: center;
             }
         }
 
-        /* 加载动画 */
         .spinner {
             width: 18px;
             height: 18px;
@@ -858,13 +925,86 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .btn-test {
+            padding: 10px 18px;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 2px solid rgba(34, 197, 94, 0.4);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .btn-test:hover {
+            background: rgba(34, 197, 94, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* 错误详情面板 */
+        .error-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-panel.show {
+            display: block;
+        }
+
+        .error-title {
+            font-weight: 800;
+            color: var(--danger);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .error-hint {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .error-hint li {
+            margin: 6px 0;
+            margin-left: 18px;
+        }
+
+        /* 调试信息 */
+        .debug-info {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-tertiary);
+        }
     </style>
 </head>
 <body>
     <div class="bg-animation"></div>
     
     <div class="container">
-        <!-- 头部 -->
         <header>
             <div class="logo">
                 <div class="logo-icon">📝</div>
@@ -876,25 +1016,56 @@
             </div>
         </header>
 
-        <!-- 设置面板 -->
         <div class="settings-panel" id="settingsPanel">
             <div class="settings-title">⚙️ GitHub 同步设置</div>
+            
             <div class="setting-item">
                 <label class="setting-label">GitHub Token</label>
-                <input type="password" class="setting-input" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxx">
-                <div class="setting-hint">在 GitHub Settings → Developer settings → Personal access tokens 中生成，需要勾选 'gist' 权限</div>
+                <div class="token-input-wrapper">
+                    <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxx">
+                    <button class="token-toggle" onclick="toggleTokenVisibility()" title="显示/隐藏">👁️</button>
+                </div>
+                <div class="setting-hint">在 GitHub Settings → Developer settings → Personal access tokens → Tokens (classic) 中生成，需要勾选 'gist' 权限</div>
             </div>
+
             <div class="setting-item">
                 <label class="setting-label">Gist ID（可选）</label>
                 <input type="text" class="setting-input" id="gistId" placeholder="自动创建或输入已有 Gist ID">
                 <div class="setting-hint">留空将自动创建新的 Gist，已有 Gist ID 可实现多设备同步</div>
             </div>
+
+            <div class="setting-item">
+                <label class="setting-label">CORS 代理（解决跨域问题）</label>
+                <div class="proxy-selector" id="proxySelector">
+                    <div class="proxy-option" data-proxy="direct">直接访问</div>
+                    <div class="proxy-option selected" data-proxy="corsproxy">corsproxy.io</div>
+                    <div class="proxy-option" data-proxy="allorigins">allorigins.win</div>
+                </div>
+                <div class="setting-hint">如果推送/拉取失败，请尝试切换代理。推荐 corsproxy.io</div>
+                <button class="btn-test" onclick="testConnection()">🧪 测试连接</button>
+            </div>
+
             <button class="btn-primary" onclick="saveSettings()" style="width: 100%; justify-content: center;">
                 💾 保存设置
             </button>
+            
+            <div class="error-panel" id="errorPanel">
+                <div class="error-title">❌ 同步失败</div>
+                <div class="error-content" id="errorContent"></div>
+                <div class="error-hint">
+                    <strong>解决方法：</strong>
+                    <ul>
+                        <li>点击 👁️ 核对 Token 是否正确（注意是否有空格）</li>
+                        <li>确认 Token 有 'gist' 权限（classic token）</li>
+                        <li>尝试切换 CORS 代理（推荐 corsproxy.io）</li>
+                        <li>检查网络连接，或尝试关闭代理/VPN</li>
+                        <li>如果之前用过 DeepSeek 版本，确认 Gist ID 正确</li>
+                    </ul>
+                </div>
+                <div class="debug-info" id="debugInfo"></div>
+            </div>
         </div>
 
-        <!-- 同步状态栏 -->
         <div class="sync-bar">
             <div class="sync-info">
                 <div class="sync-status" id="syncStatus">
@@ -916,12 +1087,10 @@
             </div>
         </div>
 
-        <!-- 搜索 -->
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="搜索便签..." oninput="searchNotes()">
         </div>
 
-        <!-- 便签列表 -->
         <div class="notes-list" id="notesList">
             <div class="empty-state">
                 <div class="empty-state-icon">📝</div>
@@ -930,7 +1099,6 @@
         </div>
     </div>
 
-    <!-- 编辑器模态框 -->
     <div class="modal" id="editorModal">
         <div class="modal-header">
             <div class="modal-title">编辑便签</div>
@@ -945,7 +1113,6 @@
         <div class="editor-container">
             <input type="text" class="editor-title" id="noteTitle" placeholder="便签标题">
             
-            <!-- 颜色选择器 -->
             <div class="color-picker">
                 <span class="color-label">便签颜色：</span>
                 <div class="color-option color-blue" data-color="blue" onclick="selectColor('blue')" title="蓝色"></div>
@@ -969,7 +1136,6 @@
         </div>
     </div>
 
-    <!-- 提示消息 -->
     <div class="toast" id="toast">
         <span id="toastIcon">✓</span>
         <span id="toastMessage">操作成功</span>
@@ -982,13 +1148,21 @@
         let currentColor = 'gray';
         let githubToken = localStorage.getItem('zen_note_token') || '';
         let gistId = localStorage.getItem('zen_note_gist_id') || '';
+        let corsProxy = localStorage.getItem('zen_note_proxy') || 'corsproxy';
+
+        // CORS 代理配置
+        const PROXY_URLS = {
+            direct: '',
+            corsproxy: 'https://corsproxy.io/?',
+            allorigins: 'https://api.allorigins.win/raw?url='
+        };
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             loadNotes();
             updateSyncUI();
+            initProxySelector();
             
-            // 自动加载 Gist 配置
             if (githubToken) {
                 document.getElementById('githubToken').value = githubToken;
                 document.getElementById('quickToken').value = githubToken;
@@ -998,11 +1172,163 @@
                 document.getElementById('quickGistId').value = gistId;
             }
 
-            // 如果有配置，自动拉取
+            // 自动同步（静默）
             if (githubToken && gistId) {
-                setTimeout(() => syncFromGithub(true), 500);
+                setTimeout(() => syncFromGithub(true), 1000);
             }
         });
+
+        // Token 显示/隐藏切换
+        function toggleTokenVisibility() {
+            const input = document.getElementById('githubToken');
+            const btn = document.querySelector('.token-toggle');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+                btn.title = '隐藏';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+                btn.title = '显示';
+            }
+        }
+
+        // 初始化代理选择器
+        function initProxySelector() {
+            const selector = document.getElementById('proxySelector');
+            selector.querySelectorAll('.proxy-option').forEach(el => {
+                el.classList.remove('selected');
+                if (el.dataset.proxy === corsProxy) {
+                    el.classList.add('selected');
+                }
+                el.onclick = () => {
+                    selector.querySelectorAll('.proxy-option').forEach(e => e.classList.remove('selected'));
+                    el.classList.add('selected');
+                    corsProxy = el.dataset.proxy;
+                    localStorage.setItem('zen_note_proxy', corsProxy);
+                };
+            });
+        }
+
+        // 构建请求 URL
+        function buildUrl(apiUrl) {
+            const proxy = PROXY_URLS[corsProxy] || '';
+            // 确保 URL 编码正确
+            if (proxy) {
+                return proxy + encodeURIComponent(apiUrl);
+            }
+            return apiUrl;
+        }
+
+        // 发送请求（带详细错误处理）
+        async function githubRequest(url, options = {}) {
+            const fullUrl = buildUrl(url);
+            
+            // 记录调试信息
+            const debugInfo = {
+                url: url,
+                fullUrl: fullUrl.substring(0, 100) + '...',
+                proxy: corsProxy,
+                method: options.method || 'GET',
+                hasToken: !!githubToken,
+                tokenPrefix: githubToken ? githubToken.substring(0, 4) + '...' : 'none'
+            };
+            
+            console.log('GitHub Request:', debugInfo);
+
+            const defaultOptions = {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            // 对于某些代理，需要特殊处理 headers
+            if (corsProxy !== 'direct') {
+                // 代理通常需要不同的 header 处理方式
+                if (corsProxy === 'corsproxy') {
+                    // corsproxy.io 支持标准 headers
+                }
+            }
+
+            try {
+                const response = await fetch(fullUrl, { ...defaultOptions, ...options });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { message: errorText };
+                    }
+                    
+                    throw {
+                        status: response.status,
+                        statusText: response.statusText,
+                        message: errorData.message || `HTTP ${response.status}`,
+                        debug: debugInfo
+                    };
+                }
+                
+                return response;
+            } catch (error) {
+                // 网络错误（fetch failed）
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw {
+                        type: 'NETWORK_ERROR',
+                        message: '无法连接到服务器，可能是 CORS 限制或网络问题',
+                        originalError: error.message,
+                        debug: debugInfo
+                    };
+                }
+                throw error;
+            }
+        }
+
+        // 测试连接
+        async function testConnection() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showToast('请先输入 GitHub Token', 'error');
+                return;
+            }
+
+            // 临时更新 token
+            const originalToken = githubToken;
+            githubToken = token;
+
+            showToast('正在测试连接...', 'success');
+            
+            try {
+                const response = await githubRequest('https://api.github.com/user');
+                const user = await response.json();
+                
+                let msg = `✅ 连接成功！用户：${user.login}`;
+                
+                // 测试 Gist 访问
+                const testGistId = document.getElementById('gistId').value.trim();
+                if (testGistId) {
+                    try {
+                        const gistRes = await githubRequest(`https://api.github.com/gists/${testGistId}`);
+                        const gist = await gistRes.json();
+                        msg += ` | Gist：${gist.description || '无描述'}`;
+                    } catch (e) {
+                        msg += ` | Gist：❌ ${e.message}`;
+                    }
+                }
+                
+                showToast(msg, 'success');
+                hideError();
+            } catch (error) {
+                showError('测试连接失败', error);
+            } finally {
+                githubToken = originalToken;
+            }
+        }
 
         // 加载本地便签
         function loadNotes() {
@@ -1013,13 +1339,11 @@
             renderNotes();
         }
 
-        // 保存到本地
         function saveToLocal() {
             localStorage.setItem('zen_notes', JSON.stringify(notes));
             renderNotes();
         }
 
-        // 渲染便签列表
         function renderNotes(filter = '') {
             const list = document.getElementById('notesList');
             const filtered = notes.filter(n => 
@@ -1048,7 +1372,6 @@
             `).join('');
         }
 
-        // 选择颜色
         function selectColor(color) {
             currentColor = color;
             document.querySelectorAll('.color-option').forEach(el => {
@@ -1057,7 +1380,6 @@
             document.querySelector(`.color-option[data-color="${color}"]`).classList.add('selected');
         }
 
-        // 创建新便签
         function createNewNote() {
             currentNoteId = null;
             currentColor = 'gray';
@@ -1068,7 +1390,6 @@
             document.getElementById('noteTitle').focus();
         }
 
-        // 打开便签
         function openNote(id) {
             const note = notes.find(n => n.id === id);
             if (!note) return;
@@ -1081,7 +1402,6 @@
             document.getElementById('editorModal').classList.add('active');
         }
 
-        // 保存便签
         function saveNote() {
             const title = document.getElementById('noteTitle').value.trim();
             const content = document.getElementById('noteContent').value.trim();
@@ -1114,13 +1434,11 @@
             closeEditor();
             showToast('保存成功');
             
-            // 自动同步到 GitHub
             if (githubToken && gistId) {
                 setTimeout(() => syncToGithub(), 1000);
             }
         }
 
-        // 删除便签
         function deleteCurrentNote() {
             if (!currentNoteId) {
                 closeEditor();
@@ -1139,26 +1457,23 @@
             }
         }
 
-        // 关闭编辑器
         function closeEditor() {
             document.getElementById('editorModal').classList.remove('active');
             currentNoteId = null;
             currentColor = 'gray';
         }
 
-        // 搜索便签
         function searchNotes() {
             const filter = document.getElementById('searchInput').value;
             renderNotes(filter);
         }
 
-        // 设置面板
         function toggleSettings() {
             const panel = document.getElementById('settingsPanel');
             panel.classList.toggle('active');
+            hideError();
         }
 
-        // 保存设置
         function saveSettings() {
             githubToken = document.getElementById('githubToken').value.trim();
             gistId = document.getElementById('gistId').value.trim();
@@ -1177,7 +1492,6 @@
             updateSyncUI();
             showToast('设置已保存');
             
-            // 如果没有 gistId，尝试创建
             if (!gistId) {
                 createGist();
             } else {
@@ -1185,7 +1499,6 @@
             }
         }
 
-        // 更新同步 UI
         function updateSyncUI() {
             const hasConfig = githubToken && gistId;
             document.getElementById('btnPush').disabled = !hasConfig;
@@ -1206,16 +1519,13 @@
             }
         }
 
-        // 创建 Gist
         async function createGist() {
             setSyncing(true);
+            hideError();
+            
             try {
-                const response = await fetch('https://api.github.com/gists', {
+                const response = await githubRequest('https://api.github.com/gists', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({
                         description: 'ZenNote 便签同步',
                         public: false,
@@ -1227,8 +1537,6 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('创建失败');
-                
                 const data = await response.json();
                 gistId = data.id;
                 localStorage.setItem('zen_note_gist_id', gistId);
@@ -1238,12 +1546,11 @@
                 updateSyncUI();
                 showToast('Gist 创建成功');
             } catch (error) {
-                showToast('创建 Gist 失败: ' + error.message, 'error');
+                showError('创建 Gist 失败', error);
             }
             setSyncing(false);
         }
 
-        // 同步到 GitHub
         async function syncToGithub() {
             if (!githubToken || !gistId) {
                 showToast('请先配置同步设置', 'error');
@@ -1251,13 +1558,11 @@
             }
 
             setSyncing(true);
+            hideError();
+            
             try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                const response = await githubRequest(`https://api.github.com/gists/${gistId}`, {
                     method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({
                         files: {
                             'zen_notes.json': {
@@ -1267,16 +1572,13 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('同步失败');
-                
                 showToast('已推送到 GitHub');
             } catch (error) {
-                showToast('推送失败: ' + error.message, 'error');
+                showError('推送失败', error);
             }
             setSyncing(false);
         }
 
-        // 从 GitHub 同步
         async function syncFromGithub(silent = false) {
             if (!githubToken || !gistId) {
                 if (!silent) showToast('请先配置同步设置', 'error');
@@ -1284,49 +1586,38 @@
             }
 
             setSyncing(true);
+            hideError();
+            
             try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                    }
-                });
-
-                if (!response.ok) throw new Error('获取失败');
-                
+                const response = await githubRequest(`https://api.github.com/gists/${gistId}`);
                 const data = await response.json();
                 const content = data.files['zen_notes.json']?.content;
                 
                 if (content) {
                     const remoteNotes = JSON.parse(content);
-                    // 合并策略：以远程为准，但保留本地较新的
                     const merged = mergeNotes(notes, remoteNotes);
                     notes = merged;
                     saveToLocal();
-                    showToast('已从 GitHub 拉取');
+                    if (!silent) showToast('已从 GitHub 拉取');
                 }
             } catch (error) {
-                if (!silent) showToast('拉取失败: ' + error.message, 'error');
+                if (!silent) showError('拉取失败', error);
             }
             setSyncing(false);
         }
 
-        // 合并便签（简单策略：更新时间较新的为准）
         function mergeNotes(local, remote) {
             const map = new Map();
-            
             local.forEach(n => map.set(n.id, n));
-            
             remote.forEach(n => {
                 const existing = map.get(n.id);
                 if (!existing || n.updated > existing.updated) {
                     map.set(n.id, n);
                 }
             });
-            
             return Array.from(map.values());
         }
 
-        // 设置同步状态
         function setSyncing(syncing) {
             const statusEl = document.getElementById('syncStatus');
             const textEl = document.getElementById('syncText');
@@ -1339,7 +1630,42 @@
             }
         }
 
-        // 工具函数
+        function showError(title, error) {
+            console.error('Error:', error);
+            
+            const panel = document.getElementById('errorPanel');
+            const content = document.getElementById('errorContent');
+            const debug = document.getElementById('debugInfo');
+            
+            let errorMsg = '';
+            let debugMsg = '';
+            
+            if (typeof error === 'object') {
+                errorMsg = error.message || '未知错误';
+                if (error.status) errorMsg += ` (HTTP ${error.status})`;
+                if (error.type === 'NETWORK_ERROR') {
+                    errorMsg += '<br><br>💡 这通常是 CORS 跨域问题，请尝试切换代理';
+                }
+                
+                // 调试信息
+                if (error.debug) {
+                    debugMsg = JSON.stringify(error.debug, null, 2);
+                }
+            } else {
+                errorMsg = String(error);
+            }
+            
+            content.innerHTML = `<strong>${title}</strong><br>${errorMsg}`;
+            debug.textContent = debugMsg ? `调试信息：\n${debugMsg}` : '';
+            panel.classList.add('show');
+            
+            showToast(title, 'error');
+        }
+
+        function hideError() {
+            document.getElementById('errorPanel').classList.remove('show');
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -1368,7 +1694,7 @@
             msg.textContent = message;
             
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => toast.classList.remove('show'), 5000);
         }
 
         function insertMarkdown(before, after = '') {
@@ -1386,7 +1712,6 @@
             textarea.focus();
         }
 
-        // 键盘快捷键
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (document.getElementById('editorModal').classList.contains('active')) {
