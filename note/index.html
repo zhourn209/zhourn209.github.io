@@ -26,7 +26,7 @@
             --border: rgba(148, 163, 184, 0.15);
             --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             
-            /* 便签颜色系统 */
+            /* 便签颜色系统 - 16种颜色 */
             --note-blue: #1e3a5f;
             --note-blue-border: #3b82f6;
             --note-green: #14532d;
@@ -41,6 +41,28 @@
             --note-pink-border: #ec4899;
             --note-gray: #374151;
             --note-gray-border: #9ca3af;
+            --note-orange: #7c2d12;
+            --note-orange-border: #f97316;
+            --note-cyan: #164e63;
+            --note-cyan-border: #06b6d4;
+            --note-lime: #365314;
+            --note-lime-border: #84cc16;
+            --note-indigo: #312e81;
+            --note-indigo-border: #6366f1;
+            --note-rose: #881337;
+            --note-rose-border: #f43f5e;
+            --note-teal: #134e4a;
+            --note-teal-border: #14b8a6;
+            --note-amber: #78350f;
+            --note-amber-border: #f59e0b;
+            --note-sky: #0c4a6e;
+            --note-sky-border: #0ea5e9;
+            --note-violet: #4c1d95;
+            --note-violet-border: #8b5cf6;
+            --note-fuchsia: #701a75;
+            --note-fuchsia-border: #d946ef;
+            --note-emerald: #064e3b;
+            --note-emerald-border: #10b981;
         }
 
         body {
@@ -325,10 +347,57 @@
             border: 2px solid var(--border);
             border-radius: 18px;
             padding: 22px;
-            cursor: pointer;
+            cursor: move;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            user-select: none;
+        }
+
+        /* 拖拽状态 */
+        .note-item.dragging {
+            opacity: 0.5;
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
+
+        .note-item.drag-over {
+            border-color: var(--accent);
+            border-style: dashed;
+            transform: translateY(5px);
+        }
+
+        /* 拖拽手柄 */
+        .drag-handle {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+            cursor: move;
+        }
+
+        .note-item:hover .drag-handle {
+            opacity: 0.6;
+        }
+
+        .drag-handle::before,
+        .drag-handle::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            box-shadow: 0 6px 0 var(--text-secondary), 0 12px 0 var(--text-secondary);
         }
 
         .note-item.note-blue {
@@ -366,6 +435,61 @@
             border-color: var(--note-gray-border);
         }
 
+        .note-item.note-orange {
+            background: linear-gradient(135deg, var(--note-orange) 0%, rgba(124, 45, 18, 0.8) 100%);
+            border-color: var(--note-orange-border);
+        }
+
+        .note-item.note-cyan {
+            background: linear-gradient(135deg, var(--note-cyan) 0%, rgba(22, 78, 99, 0.8) 100%);
+            border-color: var(--note-cyan-border);
+        }
+
+        .note-item.note-lime {
+            background: linear-gradient(135deg, var(--note-lime) 0%, rgba(54, 83, 20, 0.8) 100%);
+            border-color: var(--note-lime-border);
+        }
+
+        .note-item.note-indigo {
+            background: linear-gradient(135deg, var(--note-indigo) 0%, rgba(49, 46, 129, 0.8) 100%);
+            border-color: var(--note-indigo-border);
+        }
+
+        .note-item.note-rose {
+            background: linear-gradient(135deg, var(--note-rose) 0%, rgba(136, 19, 55, 0.8) 100%);
+            border-color: var(--note-rose-border);
+        }
+
+        .note-item.note-teal {
+            background: linear-gradient(135deg, var(--note-teal) 0%, rgba(19, 78, 74, 0.8) 100%);
+            border-color: var(--note-teal-border);
+        }
+
+        .note-item.note-amber {
+            background: linear-gradient(135deg, var(--note-amber) 0%, rgba(120, 53, 15, 0.8) 100%);
+            border-color: var(--note-amber-border);
+        }
+
+        .note-item.note-sky {
+            background: linear-gradient(135deg, var(--note-sky) 0%, rgba(12, 74, 110, 0.8) 100%);
+            border-color: var(--note-sky-border);
+        }
+
+        .note-item.note-violet {
+            background: linear-gradient(135deg, var(--note-violet) 0%, rgba(76, 29, 149, 0.8) 100%);
+            border-color: var(--note-violet-border);
+        }
+
+        .note-item.note-fuchsia {
+            background: linear-gradient(135deg, var(--note-fuchsia) 0%, rgba(112, 26, 117, 0.8) 100%);
+            border-color: var(--note-fuchsia-border);
+        }
+
+        .note-item.note-emerald {
+            background: linear-gradient(135deg, var(--note-emerald) 0%, rgba(6, 78, 59, 0.8) 100%);
+            border-color: var(--note-emerald-border);
+        }
+
         .note-item::before {
             content: '';
             position: absolute;
@@ -401,6 +525,7 @@
             justify-content: space-between;
             align-items: start;
             margin-bottom: 10px;
+            padding-left: 24px;
         }
 
         .note-title {
@@ -433,6 +558,7 @@
             -webkit-box-orient: vertical;
             line-height: 1.6;
             font-weight: 600;
+            padding-left: 24px;
         }
 
         .empty-state {
@@ -614,35 +740,7 @@
             font-weight: 500;
         }
 
-        .editor-toolbar {
-            display: flex;
-            gap: 10px;
-            padding: 14px;
-            background: var(--bg-card);
-            border-radius: 14px;
-            margin-bottom: 8px;
-            border: 2px solid var(--border);
-            flex-wrap: wrap;
-        }
-
-        .toolbar-btn {
-            padding: 10px 16px;
-            background: transparent;
-            border: 2px solid transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .toolbar-btn:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border-color: var(--border);
-        }
-
+        /* 颜色选择器 - 更多颜色 */
         .color-picker {
             display: flex;
             gap: 10px;
@@ -652,6 +750,7 @@
             border: 2px solid var(--border);
             align-items: center;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .color-label {
@@ -659,11 +758,14 @@
             color: var(--text-secondary);
             font-weight: 700;
             margin-right: 8px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 8px;
         }
 
         .color-option {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             cursor: pointer;
             border: 3px solid transparent;
@@ -689,17 +791,29 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
+        /* 颜色定义 */
         .color-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .color-sky { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+        .color-cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .color-teal { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+        .color-emerald { background: linear-gradient(135deg, #10b981, #047857); }
         .color-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .color-lime { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
         .color-yellow { background: linear-gradient(135deg, #eab308, #a16207); }
+        .color-amber { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .color-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
         .color-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-        .color-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+        .color-rose { background: linear-gradient(135deg, #f43f5e, #be123c); }
         .color-pink { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .color-fuchsia { background: linear-gradient(135deg, #d946ef, #a21caf); }
+        .color-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+        .color-violet { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .color-indigo { background: linear-gradient(135deg, #6366f1, #4338ca); }
         .color-gray { background: linear-gradient(135deg, #6b7280, #374151); }
 
         .toast {
@@ -775,7 +889,6 @@
             font-weight: 700;
         }
 
-        /* Token 输入框容器 */
         .token-input-wrapper {
             position: relative;
             display: flex;
@@ -850,82 +963,6 @@
             font-weight: 600;
         }
 
-        .proxy-selector {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .proxy-option {
-            padding: 8px 14px;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .proxy-option:hover {
-            border-color: var(--accent);
-        }
-
-        .proxy-option.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-
-        @media (max-width: 640px) {
-            .sync-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .sync-inputs {
-                min-width: auto;
-                flex-direction: column;
-            }
-
-            .modal-header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .modal-actions {
-                justify-content: stretch;
-            }
-
-            .modal-actions button {
-                flex: 1;
-                justify-content: center;
-            }
-
-            .editor-toolbar {
-                justify-content: center;
-            }
-
-            .color-picker {
-                justify-content: center;
-            }
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         .btn-test {
             padding: 10px 18px;
             background: rgba(34, 197, 94, 0.15);
@@ -944,7 +981,6 @@
             transform: translateY(-1px);
         }
 
-        /* 错误详情面板 */
         .error-panel {
             background: rgba(239, 68, 68, 0.1);
             border: 2px solid rgba(239, 68, 68, 0.3);
@@ -988,7 +1024,6 @@
             margin-left: 18px;
         }
 
-        /* 调试信息 */
         .debug-info {
             background: var(--bg-dark);
             border: 1px solid var(--border);
@@ -998,6 +1033,55 @@
             font-size: 12px;
             font-family: 'Courier New', monospace;
             color: var(--text-tertiary);
+        }
+
+        @media (max-width: 640px) {
+            .sync-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sync-inputs {
+                min-width: auto;
+                flex-direction: column;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .modal-actions {
+                justify-content: stretch;
+            }
+
+            .modal-actions button {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .color-picker {
+                gap: 8px;
+            }
+
+            .color-option {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -1034,18 +1118,9 @@
                 <div class="setting-hint">留空将自动创建新的 Gist，已有 Gist ID 可实现多设备同步</div>
             </div>
 
-            <div class="setting-item">
-                <label class="setting-label">CORS 代理（解决跨域问题）</label>
-                <div class="proxy-selector" id="proxySelector">
-                    <div class="proxy-option" data-proxy="direct">直接访问</div>
-                    <div class="proxy-option selected" data-proxy="corsproxy">corsproxy.io</div>
-                    <div class="proxy-option" data-proxy="allorigins">allorigins.win</div>
-                </div>
-                <div class="setting-hint">如果推送/拉取失败，请尝试切换代理。推荐 corsproxy.io</div>
-                <button class="btn-test" onclick="testConnection()">🧪 测试连接</button>
-            </div>
+            <button class="btn-test" onclick="testConnection()">🧪 测试连接</button>
 
-            <button class="btn-primary" onclick="saveSettings()" style="width: 100%; justify-content: center;">
+            <button class="btn-primary" onclick="saveSettings()" style="width: 100%; justify-content: center; margin-top: 16px;">
                 💾 保存设置
             </button>
             
@@ -1057,8 +1132,7 @@
                     <ul>
                         <li>点击 👁️ 核对 Token 是否正确（注意是否有空格）</li>
                         <li>确认 Token 有 'gist' 权限（classic token）</li>
-                        <li>尝试切换 CORS 代理（推荐 corsproxy.io）</li>
-                        <li>检查网络连接，或尝试关闭代理/VPN</li>
+                        <li>检查网络连接</li>
                         <li>如果之前用过 DeepSeek 版本，确认 Gist ID 正确</li>
                     </ul>
                 </div>
@@ -1114,25 +1188,28 @@
             <input type="text" class="editor-title" id="noteTitle" placeholder="便签标题">
             
             <div class="color-picker">
-                <span class="color-label">便签颜色：</span>
+                <span class="color-label">选择便签颜色</span>
                 <div class="color-option color-blue" data-color="blue" onclick="selectColor('blue')" title="蓝色"></div>
+                <div class="color-option color-sky" data-color="sky" onclick="selectColor('sky')" title="天蓝"></div>
+                <div class="color-option color-cyan" data-color="cyan" onclick="selectColor('cyan')" title="青色"></div>
+                <div class="color-option color-teal" data-color="teal" onclick="selectColor('teal')" title=" teal"></div>
+                <div class="color-option color-emerald" data-color="emerald" onclick="selectColor('emerald')" title="翠绿"></div>
                 <div class="color-option color-green" data-color="green" onclick="selectColor('green')" title="绿色"></div>
+                <div class="color-option color-lime" data-color="lime" onclick="selectColor('lime')" title=" lime"></div>
                 <div class="color-option color-yellow" data-color="yellow" onclick="selectColor('yellow')" title="黄色"></div>
+                <div class="color-option color-amber" data-color="amber" onclick="selectColor('amber')" title="琥珀"></div>
+                <div class="color-option color-orange" data-color="orange" onclick="selectColor('orange')" title="橙色"></div>
                 <div class="color-option color-red" data-color="red" onclick="selectColor('red')" title="红色"></div>
-                <div class="color-option color-purple" data-color="purple" onclick="selectColor('purple')" title="紫色"></div>
+                <div class="color-option color-rose" data-color="rose" onclick="selectColor('rose')" title="玫瑰"></div>
                 <div class="color-option color-pink" data-color="pink" onclick="selectColor('pink')" title="粉色"></div>
+                <div class="color-option color-fuchsia" data-color="fuchsia" onclick="selectColor('fuchsia')" title="紫红"></div>
+                <div class="color-option color-purple" data-color="purple" onclick="selectColor('purple')" title="紫色"></div>
+                <div class="color-option color-violet" data-color="violet" onclick="selectColor('violet')" title="紫罗兰"></div>
+                <div class="color-option color-indigo" data-color="indigo" onclick="selectColor('indigo')" title="靛蓝"></div>
                 <div class="color-option color-gray selected" data-color="gray" onclick="selectColor('gray')" title="灰色"></div>
             </div>
 
-            <div class="editor-toolbar">
-                <button class="toolbar-btn" onclick="insertMarkdown('**', '**')" title="粗体"><b>B</b></button>
-                <button class="toolbar-btn" onclick="insertMarkdown('*', '*')" title="斜体"><i>I</i></button>
-                <button class="toolbar-btn" onclick="insertMarkdown('## ')" title="标题">H</button>
-                <button class="toolbar-btn" onclick="insertMarkdown('- ')" title="列表">•</button>
-                <button class="toolbar-btn" onclick="insertMarkdown('```\n', '\n```')" title="代码块">&lt;/&gt;</button>
-                <button class="toolbar-btn" onclick="insertMarkdown('> ')" title="引用">&gt;</button>
-            </div>
-            <textarea class="editor-content" id="noteContent" placeholder="写点什么...（支持 Markdown 格式）"></textarea>
+            <textarea class="editor-content" id="noteContent" placeholder="写点什么..."></textarea>
         </div>
     </div>
 
@@ -1148,20 +1225,15 @@
         let currentColor = 'gray';
         let githubToken = localStorage.getItem('zen_note_token') || '';
         let gistId = localStorage.getItem('zen_note_gist_id') || '';
-        let corsProxy = localStorage.getItem('zen_note_proxy') || 'corsproxy';
 
-        // CORS 代理配置
-        const PROXY_URLS = {
-            direct: '',
-            corsproxy: 'https://corsproxy.io/?',
-            allorigins: 'https://api.allorigins.win/raw?url='
-        };
+        // 拖拽状态
+        let draggedItem = null;
+        let draggedIndex = null;
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             loadNotes();
             updateSyncUI();
-            initProxySelector();
             
             if (githubToken) {
                 document.getElementById('githubToken').value = githubToken;
@@ -1172,7 +1244,6 @@
                 document.getElementById('quickGistId').value = gistId;
             }
 
-            // 自动同步（静默）
             if (githubToken && gistId) {
                 setTimeout(() => syncFromGithub(true), 1000);
             }
@@ -1194,48 +1265,9 @@
             }
         }
 
-        // 初始化代理选择器
-        function initProxySelector() {
-            const selector = document.getElementById('proxySelector');
-            selector.querySelectorAll('.proxy-option').forEach(el => {
-                el.classList.remove('selected');
-                if (el.dataset.proxy === corsProxy) {
-                    el.classList.add('selected');
-                }
-                el.onclick = () => {
-                    selector.querySelectorAll('.proxy-option').forEach(e => e.classList.remove('selected'));
-                    el.classList.add('selected');
-                    corsProxy = el.dataset.proxy;
-                    localStorage.setItem('zen_note_proxy', corsProxy);
-                };
-            });
-        }
-
-        // 构建请求 URL
-        function buildUrl(apiUrl) {
-            const proxy = PROXY_URLS[corsProxy] || '';
-            // 确保 URL 编码正确
-            if (proxy) {
-                return proxy + encodeURIComponent(apiUrl);
-            }
-            return apiUrl;
-        }
-
-        // 发送请求（带详细错误处理）
+        // 发送请求（直接访问，无代理）
         async function githubRequest(url, options = {}) {
-            const fullUrl = buildUrl(url);
-            
-            // 记录调试信息
-            const debugInfo = {
-                url: url,
-                fullUrl: fullUrl.substring(0, 100) + '...',
-                proxy: corsProxy,
-                method: options.method || 'GET',
-                hasToken: !!githubToken,
-                tokenPrefix: githubToken ? githubToken.substring(0, 4) + '...' : 'none'
-            };
-            
-            console.log('GitHub Request:', debugInfo);
+            console.log('GitHub Request:', { url, method: options.method || 'GET' });
 
             const defaultOptions = {
                 method: 'GET',
@@ -1246,16 +1278,8 @@
                 }
             };
 
-            // 对于某些代理，需要特殊处理 headers
-            if (corsProxy !== 'direct') {
-                // 代理通常需要不同的 header 处理方式
-                if (corsProxy === 'corsproxy') {
-                    // corsproxy.io 支持标准 headers
-                }
-            }
-
             try {
-                const response = await fetch(fullUrl, { ...defaultOptions, ...options });
+                const response = await fetch(url, { ...defaultOptions, ...options });
                 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -1269,20 +1293,17 @@
                     throw {
                         status: response.status,
                         statusText: response.statusText,
-                        message: errorData.message || `HTTP ${response.status}`,
-                        debug: debugInfo
+                        message: errorData.message || `HTTP ${response.status}`
                     };
                 }
                 
                 return response;
             } catch (error) {
-                // 网络错误（fetch failed）
                 if (error.name === 'TypeError' && error.message.includes('fetch')) {
                     throw {
                         type: 'NETWORK_ERROR',
-                        message: '无法连接到服务器，可能是 CORS 限制或网络问题',
-                        originalError: error.message,
-                        debug: debugInfo
+                        message: '无法连接到 GitHub，请检查网络或 Token 是否正确',
+                        originalError: error.message
                     };
                 }
                 throw error;
@@ -1297,7 +1318,6 @@
                 return;
             }
 
-            // 临时更新 token
             const originalToken = githubToken;
             githubToken = token;
 
@@ -1309,7 +1329,6 @@
                 
                 let msg = `✅ 连接成功！用户：${user.login}`;
                 
-                // 测试 Gist 访问
                 const testGistId = document.getElementById('gistId').value.trim();
                 if (testGistId) {
                     try {
@@ -1344,12 +1363,13 @@
             renderNotes();
         }
 
+        // 渲染便签列表（带拖拽）
         function renderNotes(filter = '') {
             const list = document.getElementById('notesList');
             const filtered = notes.filter(n => 
                 n.title.toLowerCase().includes(filter.toLowerCase()) || 
                 n.content.toLowerCase().includes(filter.toLowerCase())
-            ).sort((a, b) => b.updated - a.updated);
+            );
 
             if (filtered.length === 0) {
                 list.innerHTML = `
@@ -1361,8 +1381,13 @@
                 return;
             }
 
-            list.innerHTML = filtered.map(note => `
-                <div class="note-item note-${note.color || 'gray'} ${currentNoteId === note.id ? 'active' : ''}" onclick="openNote('${note.id}')">
+            list.innerHTML = filtered.map((note, index) => `
+                <div class="note-item note-${note.color || 'gray'} ${currentNoteId === note.id ? 'active' : ''}" 
+                     data-id="${note.id}" 
+                     data-index="${index}"
+                     draggable="true"
+                     onclick="openNote('${note.id}')">
+                    <div class="drag-handle" onclick="event.stopPropagation()"></div>
                     <div class="note-header">
                         <div class="note-title">${escapeHtml(note.title) || '无标题'}</div>
                         <div class="note-date">${formatDate(note.updated)}</div>
@@ -1370,6 +1395,168 @@
                     <div class="note-preview">${escapeHtml(note.content)}</div>
                 </div>
             `).join('');
+
+            // 绑定拖拽事件
+            bindDragEvents();
+        }
+
+        // 绑定拖拽事件
+        function bindDragEvents() {
+            const items = document.querySelectorAll('.note-item');
+            
+            items.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+                
+                // 触摸支持（移动端）
+                item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            draggedIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (this !== draggedItem) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedItem !== this) {
+                const targetIndex = parseInt(this.dataset.index);
+                const draggedId = draggedItem.dataset.id;
+                const targetId = this.dataset.id;
+                
+                // 重新排序数组
+                const draggedNote = notes.find(n => n.id === draggedId);
+                const targetNote = notes.find(n => n.id === targetId);
+                
+                const draggedIdx = notes.indexOf(draggedNote);
+                const targetIdx = notes.indexOf(targetNote);
+                
+                // 移除并插入到新位置
+                notes.splice(draggedIdx, 1);
+                notes.splice(targetIdx, 0, draggedNote);
+                
+                // 更新排序标记
+                notes.forEach((note, idx) => {
+                    note.order = idx;
+                });
+                
+                saveToLocal();
+                showToast('顺序已更新');
+                
+                // 自动同步
+                if (githubToken && gistId) {
+                    setTimeout(() => syncToGithub(), 1000);
+                }
+            }
+            
+            return false;
+        }
+
+        // 触摸拖拽支持
+        let touchItem = null;
+        let touchOffset = { x: 0, y: 0 };
+
+        function handleTouchStart(e) {
+            touchItem = this;
+            const touch = e.touches[0];
+            const rect = this.getBoundingClientRect();
+            touchOffset.x = touch.clientX - rect.left;
+            touchOffset.y = touch.clientY - rect.top;
+            this.classList.add('dragging');
+        }
+
+        function handleTouchMove(e) {
+            if (!touchItem) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const noteBelow = elementBelow?.closest('.note-item');
+            
+            if (noteBelow && noteBelow !== touchItem) {
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.classList.remove('drag-over');
+                });
+                noteBelow.classList.add('drag-over');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchItem) return;
+            
+            const touch = e.changedTouches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const noteBelow = elementBelow?.closest('.note-item');
+            
+            if (noteBelow && noteBelow !== touchItem) {
+                // 模拟 drop
+                const draggedId = touchItem.dataset.id;
+                const targetId = noteBelow.dataset.id;
+                
+                const draggedNote = notes.find(n => n.id === draggedId);
+                const targetNote = notes.find(n => n.id === targetId);
+                
+                const draggedIdx = notes.indexOf(draggedNote);
+                const targetIdx = notes.indexOf(targetNote);
+                
+                notes.splice(draggedIdx, 1);
+                notes.splice(targetIdx, 0, draggedNote);
+                
+                notes.forEach((note, idx) => {
+                    note.order = idx;
+                });
+                
+                saveToLocal();
+                showToast('顺序已更新');
+                
+                if (githubToken && gistId) {
+                    setTimeout(() => syncToGithub(), 1000);
+                }
+            }
+            
+            touchItem.classList.remove('dragging');
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+            touchItem = null;
         }
 
         function selectColor(color) {
@@ -1426,7 +1613,8 @@
                     content: content,
                     color: currentColor,
                     created: now,
-                    updated: now
+                    updated: now,
+                    order: notes.length
                 });
             }
 
@@ -1595,6 +1783,7 @@
                 
                 if (content) {
                     const remoteNotes = JSON.parse(content);
+                    // 保留本地顺序，合并内容
                     const merged = mergeNotes(notes, remoteNotes);
                     notes = merged;
                     saveToLocal();
@@ -1608,14 +1797,23 @@
 
         function mergeNotes(local, remote) {
             const map = new Map();
-            local.forEach(n => map.set(n.id, n));
+            
+            // 先按 order 排序
+            local.forEach(n => map.set(n.id, { ...n, source: 'local' }));
+            
             remote.forEach(n => {
                 const existing = map.get(n.id);
-                if (!existing || n.updated > existing.updated) {
-                    map.set(n.id, n);
+                if (existing) {
+                    // 保留本地顺序，更新内容
+                    if (n.updated > existing.updated) {
+                        map.set(n.id, { ...n, order: existing.order, source: 'merged' });
+                    }
+                } else {
+                    map.set(n.id, { ...n, source: 'remote' });
                 }
             });
-            return Array.from(map.values());
+            
+            return Array.from(map.values()).sort((a, b) => (a.order || 0) - (b.order || 0));
         }
 
         function setSyncing(syncing) {
@@ -1644,12 +1842,7 @@
                 errorMsg = error.message || '未知错误';
                 if (error.status) errorMsg += ` (HTTP ${error.status})`;
                 if (error.type === 'NETWORK_ERROR') {
-                    errorMsg += '<br><br>💡 这通常是 CORS 跨域问题，请尝试切换代理';
-                }
-                
-                // 调试信息
-                if (error.debug) {
-                    debugMsg = JSON.stringify(error.debug, null, 2);
+                    errorMsg += '<br><br>💡 网络错误，请检查 Token 和网络连接';
                 }
             } else {
                 errorMsg = String(error);
@@ -1695,21 +1888,6 @@
             
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 5000);
-        }
-
-        function insertMarkdown(before, after = '') {
-            const textarea = document.getElementById('noteContent');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            const selection = text.substring(start, end);
-            
-            const newText = text.substring(0, start) + before + selection + after + text.substring(end);
-            textarea.value = newText;
-            
-            const newCursor = start + before.length + selection.length;
-            textarea.setSelectionRange(newCursor, newCursor);
-            textarea.focus();
         }
 
         document.addEventListener('keydown', (e) => {
