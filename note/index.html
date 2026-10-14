@@ -77,6 +77,14 @@
     .gist-panel .small-btn {
       background: #f9fbfe;
     }
+    .gist-panel .save-btn {
+      background: #e8f5e9;
+      border-color: #a5d6a7;
+      color: #1b5e20;
+    }
+    .gist-panel .save-btn:hover {
+      background: #c8e6c9;
+    }
 
     /* 标签栏 */
     .tabs-bar {
@@ -387,6 +395,7 @@
   <div class="gist-panel">
     <input type="text" id="gistToken" placeholder="GitHub Token (gist 权限)" autocomplete="off">
     <input type="text" id="gistId" placeholder="Gist ID (不填则创建新的)" autocomplete="off">
+    <button id="saveGistBtn" class="small-btn save-btn" title="保存 Token 和 Gist ID 到本地">💾 保存</button>
     <button id="testGistBtn" class="small-btn" title="测试 Token 是否有效">🔍 测试连接</button>
     <button id="uploadGistBtn" class="primary" title="上传/更新 Gist">⬆️ 上传</button>
     <button id="downloadGistBtn" class="primary" title="从 Gist 下载">⬇️ 下载</button>
@@ -468,7 +477,9 @@
     // ---------- 数据状态 ----------
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v4';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v5';
+    const TOKEN_KEY = 'lightweight_gist_token';
+    const GISTID_KEY = 'lightweight_gist_id';
 
     // 保存的选区
     let savedRange = null;
@@ -487,6 +498,7 @@
     const importFileInput = document.getElementById('importFileInput');
     const gistToken = document.getElementById('gistToken');
     const gistId = document.getElementById('gistId');
+    const saveGistBtn = document.getElementById('saveGistBtn');
     const testGistBtn = document.getElementById('testGistBtn');
     const uploadGistBtn = document.getElementById('uploadGistBtn');
     const downloadGistBtn = document.getElementById('downloadGistBtn');
@@ -522,20 +534,6 @@
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(savedRange);
-        return true;
-      }
-      return false;
-    }
-
-    // 检查是否有可用的选区（当前或已保存）
-    function hasValidSelection() {
-      // 优先检查当前选区
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0 && !selection.isCollapsed && editor.contains(selection.anchorNode)) {
-        return true;
-      }
-      // 检查保存的选区
-      if (savedRange && !savedRange.collapsed) {
         return true;
       }
       return false;
@@ -579,7 +577,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 工具栏固定，滚动时保持可见'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- Token 和 Gist ID 会自动保存到本地'
       }];
       activeTabId = defaultId;
     }
@@ -806,6 +804,25 @@
       saveSelection();
     }
 
+    // ---------- Gist 面板：保存与恢复 ----------
+    function saveGistCredentials() {
+      localStorage.setItem(TOKEN_KEY, gistToken.value.trim());
+      localStorage.setItem(GISTID_KEY, gistId.value.trim());
+    }
+
+    // 自动保存（输入时）
+    gistToken.addEventListener('input', saveGistCredentials);
+    gistId.addEventListener('input', saveGistCredentials);
+    // 失焦时再保存一次（防止输入法未触发 input 的情况）
+    gistToken.addEventListener('blur', saveGistCredentials);
+    gistId.addEventListener('blur', saveGistCredentials);
+
+    // 手动保存按钮
+    saveGistBtn.addEventListener('click', () => {
+      saveGistCredentials();
+      showToast('✅ Token 和 Gist ID 已保存到本地', 'success');
+    });
+
     // ---------- 事件绑定 ----------
     // 编辑器内实时保存选区
     editor.addEventListener('mouseup', saveSelection);
@@ -854,7 +871,7 @@
       applyTextColor(color);
     });
 
-    // 文字基本色块点击（直接应用）—— 关键修复：mousedown 阻止默认防止选区丢失
+    // 文字基本色块点击（直接应用）—— mousedown 阻止默认防止选区丢失
     textSwatchGroup.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
@@ -891,7 +908,7 @@
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 4,
+        version: 5,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -996,7 +1013,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 4,
+        version: 5,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -1018,6 +1035,8 @@
           const body = { description: '轻量多标签笔记同步', public: false, files };
           result = await gistRequest(token, null, 'POST', body);
           gistId.value = result.id;
+          // 保存新创建的 gist id
+          localStorage.setItem(GISTID_KEY, result.id);
           showToast(`✅ 已创建新 Gist (ID: ${result.id})`, 'success');
         }
       } catch (err) {
@@ -1099,6 +1118,13 @@
       if (!tabs.find(t => t.id === activeTabId)) {
         activeTabId = tabs[0]?.id || null;
       }
+
+      // 恢复保存的 token 和 gist id
+      const savedToken = localStorage.getItem(TOKEN_KEY);
+      const savedGistId = localStorage.getItem(GISTID_KEY);
+      if (savedToken) gistToken.value = savedToken;
+      if (savedGistId) gistId.value = savedGistId;
+
       renderTabs();
       updateEditorFromActiveTab();
       updateColorPickerFromActiveTab();
