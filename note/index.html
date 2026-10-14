@@ -159,7 +159,7 @@
       background: #c0cee2;
     }
 
-    /* 固定工具栏（颜色/格式/字体大小） */
+    /* 固定工具栏 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -174,27 +174,8 @@
       top: 0;
       z-index: 10;
     }
-    .toolbar button, .toolbar input[type="text"], .toolbar input[type="number"] {
-      font-size: 13px;
-      padding: 6px 12px;
-      border: 1px solid #b8c6db;
-      border-radius: 30px;
-      background: white;
-      cursor: pointer;
-      transition: 0.1s;
-      font-family: inherit;
-    }
-    .toolbar button {
-      background: #eef2f8;
-      font-weight: 500;
-      color: #1e2e4a;
-    }
-    .toolbar button:hover {
-      background: #d9e1ec;
-      border-color: #8a9fc0;
-    }
 
-    /* 标签颜色选择区域 */
+    /* 标签颜色区域 */
     .tab-color-area {
       display: flex;
       align-items: center;
@@ -231,8 +212,21 @@
       border-color: #2a6df4;
       box-shadow: 0 0 0 2px white, 0 0 0 4px #2a6df4;
     }
+    /* 自定义颜色确认按钮 */
+    .confirm-color-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 20px;
+      border: 1px solid #b8c6db;
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .confirm-color-btn:hover {
+      background: #d9e1ec;
+    }
 
-    /* 文字颜色选择区域 */
+    /* 文字颜色区域 */
     .text-color-area {
       display: flex;
       align-items: center;
@@ -266,7 +260,7 @@
       border-color: #2a6df4;
     }
 
-    /* 字体大小选择 */
+    /* 字体大小区域 */
     .font-size-area {
       display: flex;
       align-items: center;
@@ -382,7 +376,6 @@
       background: #0b6e4f;
     }
 
-    /* 隐藏的导入文件 input */
     #importFileInput {
       display: none;
     }
@@ -402,31 +395,31 @@
   <!-- 标签栏 -->
   <div class="tabs-bar" id="tabsBar"></div>
 
-  <!-- 固定工具栏（粘性定位） -->
+  <!-- 固定工具栏 -->
   <div class="toolbar">
-    <!-- 标签颜色设置：调色板 + 六个基本色块 -->
+    <!-- 标签颜色设置：红橙黄绿黑白 -->
     <div class="tab-color-area">
       <span class="label">🏷️ 标签色</span>
       <input type="color" id="tabColorPicker" value="#f0f3f9" title="自定义标签颜色" style="width:28px;height:28px;border:none;background:transparent;cursor:pointer;padding:0;">
+      <button class="confirm-color-btn" id="applyTabColorBtn">确定</button>
       <div class="swatch-group" id="tabSwatchGroup">
-        <!-- 六个基本色块 -->
-        <div class="swatch" data-color="#f0f3f9" style="background:#f0f3f9;" title="浅灰"></div>
-        <div class="swatch" data-color="#ffd6d6" style="background:#ffd6d6;" title="浅红"></div>
-        <div class="swatch" data-color="#d6ffd6" style="background:#d6ffd6;" title="浅绿"></div>
-        <div class="swatch" data-color="#d6e4ff" style="background:#d6e4ff;" title="浅蓝"></div>
-        <div class="swatch" data-color="#fff3d6" style="background:#fff3d6;" title="浅黄"></div>
-        <div class="swatch" data-color="#f0d6ff" style="background:#f0d6ff;" title="浅紫"></div>
+        <div class="swatch" data-color="#e74c3c" style="background:#e74c3c;" title="红"></div>
+        <div class="swatch" data-color="#f39c12" style="background:#f39c12;" title="橙"></div>
+        <div class="swatch" data-color="#f1c40f" style="background:#f1c40f;" title="黄"></div>
+        <div class="swatch" data-color="#27ae60" style="background:#27ae60;" title="绿"></div>
+        <div class="swatch" data-color="#000000" style="background:#000000;" title="黑"></div>
+        <div class="swatch" data-color="#ffffff" style="background:#ffffff;border:1px solid #ccc;" title="白"></div>
       </div>
     </div>
 
-    <!-- 文字格式：加粗 + 文字颜色（调色板 + 六个基本色块） -->
+    <!-- 文字格式：加粗 + 文字颜色 + 字体大小 -->
     <div class="format-group">
       <button class="format-btn bold-btn" id="boldBtn" title="加粗选中文字 (Ctrl+B)">B 加粗</button>
       <div class="text-color-area">
         <span class="label">🎨 字色</span>
         <input type="color" id="textColorPicker" value="#ff0000" title="自定义文字颜色" style="width:26px;height:26px;border:none;background:transparent;cursor:pointer;padding:0;">
+        <button class="confirm-color-btn" id="applyTextColorBtn">确定</button>
         <div class="text-swatch-group" id="textSwatchGroup">
-          <!-- 六个基本文字色块 -->
           <div class="text-swatch" data-color="#000000" style="background:#000000;" title="黑色"></div>
           <div class="text-swatch" data-color="#ff0000" style="background:#ff0000;" title="红色"></div>
           <div class="text-swatch" data-color="#0066ff" style="background:#0066ff;" title="蓝色"></div>
@@ -435,23 +428,22 @@
           <div class="text-swatch" data-color="#9900cc" style="background:#9900cc;" title="紫色"></div>
         </div>
       </div>
-    </div>
-
-    <!-- 字体大小 -->
-    <div class="font-size-area">
-      <span class="label">Aa</span>
-      <select id="fontSizeSelect" title="字体大小">
-        <option value="12px">12px</option>
-        <option value="13px">13px</option>
-        <option value="14px">14px</option>
-        <option value="15px" selected>15px</option>
-        <option value="16px">16px</option>
-        <option value="18px">18px</option>
-        <option value="20px">20px</option>
-        <option value="24px">24px</option>
-        <option value="28px">28px</option>
-        <option value="32px">32px</option>
-      </select>
+      <!-- 字体大小（仅对选中内容生效） -->
+      <div class="font-size-area">
+        <span class="label">Aa</span>
+        <select id="fontSizeSelect" title="字体大小（选中文字后应用）">
+          <option value="12px">12px</option>
+          <option value="13px">13px</option>
+          <option value="14px">14px</option>
+          <option value="15px" selected>15px</option>
+          <option value="16px">16px</option>
+          <option value="18px">18px</option>
+          <option value="20px">20px</option>
+          <option value="24px">24px</option>
+          <option value="28px">28px</option>
+          <option value="32px">32px</option>
+        </select>
+      </div>
     </div>
 
     <div class="spacer"></div>
@@ -476,14 +468,16 @@
     // ---------- 数据状态 ----------
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v2';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v3';
 
     // DOM 元素
     const tabsBar = document.getElementById('tabsBar');
     const editor = document.getElementById('editor');
     const tabColorPicker = document.getElementById('tabColorPicker');
+    const applyTabColorBtn = document.getElementById('applyTabColorBtn');
     const boldBtn = document.getElementById('boldBtn');
     const textColorPicker = document.getElementById('textColorPicker');
+    const applyTextColorBtn = document.getElementById('applyTextColorBtn');
     const fontSizeSelect = document.getElementById('fontSizeSelect');
     const exportJsonBtn = document.getElementById('exportJsonBtn');
     const importJsonBtn = document.getElementById('importJsonBtn');
@@ -497,10 +491,8 @@
     const tabSwatchGroup = document.getElementById('tabSwatchGroup');
     const textSwatchGroup = document.getElementById('textSwatchGroup');
 
-    // 六个基本标签颜色
-    const TAB_BASIC_COLORS = ['#f0f3f9', '#ffd6d6', '#d6ffd6', '#d6e4ff', '#fff3d6', '#f0d6ff'];
-    // 六个基本文字颜色
-    const TEXT_BASIC_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa44', '#ff8800', '#9900cc'];
+    // 标签基本色（红橙黄绿黑白）
+    const TAB_BASIC_COLORS = ['#e74c3c', '#f39c12', '#f1c40f', '#27ae60', '#000000', '#ffffff'];
 
     // ---------- 工具函数 ----------
     function showToast(message, type = 'success') {
@@ -516,12 +508,10 @@
       return Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
     }
 
-    // 保存到localStorage
     function saveToLocal() {
       try {
         const data = {
           tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content })),
-          fontSize: fontSizeSelect.value,
           activeTabId: activeTabId
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -530,7 +520,6 @@
       }
     }
 
-    // 从localStorage加载
     function loadFromLocal() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -544,10 +533,6 @@
               content: t.content || ''
             }));
             activeTabId = parsed.activeTabId && tabs.find(t => t.id === parsed.activeTabId) ? parsed.activeTabId : tabs[0].id;
-            if (parsed.fontSize) {
-              fontSizeSelect.value = parsed.fontSize;
-              editor.style.fontSize = parsed.fontSize;
-            }
             return true;
           }
         } catch (e) {}
@@ -561,7 +546,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色按钮\n- 顶部支持 GitHub Gist 同步\n- 工具栏固定，滚动时保持可见'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 工具栏固定，滚动时保持可见'
       }];
       activeTabId = defaultId;
     }
@@ -570,7 +555,7 @@
       return tabs.find(t => t.id === activeTabId) || null;
     }
 
-    // 更新标签颜色色块的选中状态
+    // 更新标签颜色色块选中状态
     function updateTabSwatchSelection(color) {
       document.querySelectorAll('#tabSwatchGroup .swatch').forEach(sw => {
         if (sw.dataset.color.toLowerCase() === color.toLowerCase()) {
@@ -733,32 +718,59 @@
       saveToLocal();
     }
 
-    // 文字颜色
+    // 应用文字颜色（对选中文字）
     function applyTextColor(color) {
-      document.execCommand('foreColor', false, color);
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) {
+        showToast('请先选中文字', 'error');
+        return;
+      }
+      // 确保编辑器获得焦点
       editor.focus();
+      // 使用 execCommand 应用前景色
+      document.execCommand('foreColor', false, color);
       syncEditorToActiveTab();
       saveToLocal();
     }
 
-    // 字体大小
+    // 应用字体大小（仅对选中文字）
     function applyFontSize(size) {
-      editor.style.fontSize = size;
-      // 同时应用到编辑器内所有文字（通过包裹或直接修改编辑器样式）
-      // 更可靠的方式：对选中文字应用 font size，但简单起见：编辑器整体字体变化
-      // 但选中文字的大小无法直接通过 execCommand fontSize 精确到 px，这里采用整体字体大小控制
-      // 为了不影响已设置的 span 大小，整体调整编辑器字号即可满足大多数需求
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) {
+        showToast('请先选中文字', 'error');
+        return;
+      }
+      editor.focus();
+      // 使用 execCommand 的 fontSize 只支持 1-7，改用包裹 span 方式
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.fontSize = size;
+      try {
+        range.surroundContents(span);
+      } catch (e) {
+        // 如果选区跨多个元素，使用 extractContents + insertNode
+        const content = range.extractContents();
+        span.appendChild(content);
+        range.insertNode(span);
+      }
+      // 重新选中
+      selection.removeAllRanges();
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.addRange(newRange);
       syncEditorToActiveTab();
       saveToLocal();
     }
 
     // ---------- 事件绑定 ----------
-    // 标签颜色选择器
-    tabColorPicker.addEventListener('input', (e) => {
-      setActiveTabColor(e.target.value);
+    // 标签颜色自定义调色板（点击确定按钮应用）
+    applyTabColorBtn.addEventListener('click', () => {
+      const color = tabColorPicker.value;
+      setActiveTabColor(color);
+      showToast(`标签颜色已设为 ${color}`, 'success');
     });
 
-    // 标签基本色块点击
+    // 标签基本色块点击（直接应用）
     tabSwatchGroup.addEventListener('click', (e) => {
       const swatch = e.target.closest('.swatch');
       if (!swatch) return;
@@ -775,12 +787,13 @@
       applyBold();
     });
 
-    // 文字颜色选择器（自定义）
-    textColorPicker.addEventListener('input', (e) => {
-      applyTextColor(e.target.value);
+    // 文字颜色自定义调色板（点击确定按钮应用）
+    applyTextColorBtn.addEventListener('click', () => {
+      const color = textColorPicker.value;
+      applyTextColor(color);
     });
 
-    // 文字基本色块点击
+    // 文字基本色块点击（直接应用）
     textSwatchGroup.addEventListener('click', (e) => {
       const swatch = e.target.closest('.text-swatch');
       if (!swatch) return;
@@ -793,7 +806,8 @@
 
     // 字体大小选择
     fontSizeSelect.addEventListener('change', (e) => {
-      applyFontSize(e.target.value);
+      const size = e.target.value;
+      applyFontSize(size);
     });
 
     // 编辑器输入保存
@@ -815,8 +829,7 @@
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 2,
-        fontSize: fontSizeSelect.value,
+        version: 3,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -850,10 +863,6 @@
               content: t.content || ''
             }));
             activeTabId = tabs[0].id;
-            if (data.fontSize) {
-              fontSizeSelect.value = data.fontSize;
-              editor.style.fontSize = data.fontSize;
-            }
             renderTabs();
             updateEditorFromActiveTab();
             updateColorPickerFromActiveTab();
@@ -924,8 +933,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 2,
-        fontSize: fontSizeSelect.value,
+        version: 3,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -996,10 +1004,6 @@
           content: t.content || ''
         }));
         activeTabId = tabs[0].id;
-        if (parsed.fontSize) {
-          fontSizeSelect.value = parsed.fontSize;
-          editor.style.fontSize = parsed.fontSize;
-        }
         renderTabs();
         updateEditorFromActiveTab();
         updateColorPickerFromActiveTab();
@@ -1034,12 +1038,6 @@
       renderTabs();
       updateEditorFromActiveTab();
       updateColorPickerFromActiveTab();
-      // 初始化文字基本色块选中状态
-      document.querySelectorAll('#textSwatchGroup .text-swatch').forEach(sw => {
-        if (sw.dataset.color === textColorPicker.value) {
-          sw.style.borderColor = '#2a6df4';
-        }
-      });
       saveToLocal();
     }
 
