@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>多标签笔记 · 轻量版</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+    html, body {
+      height: 100%;
     }
     body {
       background: #f5f7fb;
@@ -17,34 +20,36 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 16px;
+      padding: 0;
     }
     .app {
       width: 100%;
       max-width: 1100px;
       background: white;
-      border-radius: 24px;
+      border-radius: 0;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      max-height: 95vh;
+      height: 100vh;
+      height: 100dvh; /* 移动端动态视口高度 */
     }
 
-    /* 顶部 Gist 同步面板 */
+    /* 顶部 Gist 同步面板 —— 桌面端完整展示，移动端折叠 */
     .gist-panel {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
+      gap: 6px;
+      padding: 8px 12px;
       background: #eef2f8;
       border-bottom: 1px solid #d9e1ec;
       font-size: 13px;
+      flex-shrink: 0;
     }
     .gist-panel input {
-      flex: 1 1 140px;
-      padding: 6px 12px;
+      flex: 1 1 120px;
+      padding: 5px 10px;
       border-radius: 30px;
       border: 1px solid #b8c6db;
       font-family: inherit;
@@ -53,7 +58,7 @@
       min-width: 0;
     }
     .gist-panel button {
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 30px;
       border: 1px solid #b8c6db;
       background: #fff;
@@ -86,13 +91,29 @@
       background: #c8e6c9;
     }
 
+    /* Gist 面板的折叠开关（移动端显示） */
+    .gist-toggle {
+      display: none;
+      width: 100%;
+      padding: 6px;
+      background: #e0e8f5;
+      border: none;
+      border-bottom: 1px solid #d9e1ec;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e2e4a;
+      cursor: pointer;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
     /* 标签栏 */
     .tabs-bar {
       display: flex;
       align-items: center;
       background: #f0f3f9;
-      padding: 8px 12px;
-      gap: 6px;
+      padding: 6px 10px;
+      gap: 5px;
       overflow-x: auto;
       scrollbar-width: thin;
       border-bottom: 1px solid #d9e1ec;
@@ -100,7 +121,7 @@
       flex-shrink: 0;
     }
     .tabs-bar::-webkit-scrollbar {
-      height: 5px;
+      height: 4px;
     }
     .tabs-bar::-webkit-scrollbar-thumb {
       background: #b0bedb;
@@ -109,8 +130,8 @@
     .tab {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
+      gap: 5px;
+      padding: 5px 9px;
       background: white;
       border-radius: 30px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -118,7 +139,7 @@
       white-space: nowrap;
       border: 1px solid transparent;
       transition: 0.15s;
-      font-size: 14px;
+      font-size: 13px;
       flex-shrink: 0;
     }
     .tab.active {
@@ -127,8 +148,8 @@
       background: #ffffff;
     }
     .tab-color-indicator {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
       background: #ddd;
       border: 1px solid rgba(0, 0, 0, 0.1);
@@ -136,11 +157,11 @@
     .tab-close {
       background: transparent;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1;
       color: #888;
       cursor: pointer;
-      padding: 0 4px;
+      padding: 0 3px;
       border-radius: 50%;
       transition: 0.1s;
     }
@@ -151,10 +172,10 @@
     .add-tab-btn {
       background: #d9e1ec;
       border: none;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 30px;
-      font-size: 18px;
+      font-size: 17px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -167,13 +188,13 @@
       background: #c0cee2;
     }
 
-    /* 固定工具栏 */
+    /* 工具栏 —— 桌面端一行，移动端可折叠紧凑显示 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 12px;
-      padding: 10px 16px;
+      gap: 8px;
+      padding: 6px 12px;
       background: #f9fbfe;
       border-bottom: 1px solid #d9e1ec;
       font-size: 14px;
@@ -183,29 +204,45 @@
       z-index: 10;
     }
 
+    /* 移动端工具栏折叠开关 */
+    .toolbar-toggle {
+      display: none;
+      width: 100%;
+      padding: 6px;
+      background: #eef4ff;
+      border: none;
+      border-bottom: 1px solid #d9e1ec;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e2e4a;
+      cursor: pointer;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
     /* 标签颜色区域 */
     .tab-color-area {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       background: #eef2f8;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 30px;
       border: 1px solid #b8c6db;
     }
     .tab-color-area .label {
-      font-size: 13px;
+      font-size: 12px;
       color: #2c3e5c;
       white-space: nowrap;
     }
     .swatch-group {
       display: flex;
-      gap: 5px;
+      gap: 4px;
     }
     .swatch {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       border: 2px solid transparent;
       cursor: pointer;
@@ -220,10 +257,9 @@
       border-color: #2a6df4;
       box-shadow: 0 0 0 2px white, 0 0 0 4px #2a6df4;
     }
-    /* 自定义颜色确认按钮 */
     .confirm-color-btn {
-      padding: 4px 10px;
-      font-size: 12px;
+      padding: 3px 8px;
+      font-size: 11px;
       border-radius: 20px;
       border: 1px solid #b8c6db;
       background: #fff;
@@ -238,25 +274,25 @@
     .text-color-area {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       background: #eef2f8;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 30px;
       border: 1px solid #b8c6db;
     }
     .text-color-area .label {
-      font-size: 13px;
+      font-size: 12px;
       color: #2c3e5c;
       white-space: nowrap;
     }
     .text-swatch-group {
       display: flex;
-      gap: 5px;
+      gap: 4px;
     }
     .text-swatch {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       border: 2px solid transparent;
       cursor: pointer;
@@ -272,23 +308,23 @@
     .font-size-area {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: #eef2f8;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 30px;
       border: 1px solid #b8c6db;
     }
     .font-size-area .label {
-      font-size: 13px;
+      font-size: 12px;
       color: #2c3e5c;
     }
     .font-size-area select {
-      padding: 5px 8px;
+      padding: 4px 6px;
       border-radius: 20px;
       border: 1px solid #b8c6db;
       background: white;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       outline: none;
     }
@@ -302,9 +338,9 @@
     .format-btn {
       background: #eef2f8;
       border: 1px solid #b8c6db;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 30px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       color: #1e2e4a;
@@ -323,9 +359,17 @@
       flex: 1;
     }
 
-    /* 编辑器区域 */
+    /* 导入导出按钮 */
+    .io-group {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* 编辑器区域 —— 占据剩余空间，保证至少 80% 页面高度 */
     .editor-container {
-      padding: 16px 20px;
+      padding: 10px 14px;
       background: white;
       flex: 1;
       display: flex;
@@ -336,9 +380,9 @@
     .editor {
       width: 100%;
       flex: 1;
-      padding: 16px 18px;
+      padding: 12px 14px;
       border: 1px solid #d9e1ec;
-      border-radius: 18px;
+      border-radius: 14px;
       font-size: 15px;
       line-height: 1.6;
       background: #ffffff;
@@ -348,7 +392,7 @@
       white-space: pre-wrap;
       word-break: break-word;
       transition: 0.1s;
-      min-height: 200px;
+      min-height: 0;
     }
     .editor:focus {
       border-color: #2a6df4;
@@ -358,20 +402,20 @@
     /* 状态提示 */
     .status-toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: #1e2e4a;
       color: white;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 50px;
-      font-size: 14px;
+      font-size: 13px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.25s;
       z-index: 999;
-      max-width: 80vw;
+      max-width: 85vw;
       text-align: center;
     }
     .status-toast.show {
@@ -387,29 +431,139 @@
     #importFileInput {
       display: none;
     }
+
+    /* ============ 移动端适配 ============ */
+    @media (max-width: 768px) {
+      body {
+        padding: 0;
+      }
+      .app {
+        border-radius: 0;
+        height: 100vh;
+        height: 100dvh;
+      }
+
+      /* Gist 面板折叠 —— 默认隐藏，点击开关展开 */
+      .gist-toggle {
+        display: block;
+      }
+      .gist-panel {
+        display: none;
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .gist-panel.open {
+        display: flex;
+      }
+      .gist-panel input {
+        flex: 1 1 100%;
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      .gist-panel button {
+        flex: 1 1 auto;
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+
+      /* 工具栏折叠 —— 默认隐藏，点击开关展开 */
+      .toolbar-toggle {
+        display: block;
+      }
+      .toolbar {
+        display: none;
+        padding: 6px 10px;
+        gap: 6px;
+      }
+      .toolbar.open {
+        display: flex;
+      }
+
+      /* 移动端控件更紧凑 */
+      .tab-color-area,
+      .text-color-area,
+      .font-size-area {
+        padding: 3px 6px;
+        gap: 5px;
+      }
+      .tab-color-area .label,
+      .text-color-area .label {
+        font-size: 11px;
+      }
+      .swatch {
+        width: 20px;
+        height: 20px;
+      }
+      .text-swatch {
+        width: 18px;
+        height: 18px;
+      }
+      .format-btn {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+      .io-group {
+        margin-left: auto;
+      }
+
+      /* 编辑器区域最大化 */
+      .editor-container {
+        padding: 6px 8px;
+      }
+      .editor {
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 15px;
+      }
+    }
+
+    /* 超小屏进一步紧凑 */
+    @media (max-width: 400px) {
+      .gist-panel button {
+        font-size: 11px;
+        padding: 5px 6px;
+      }
+      .swatch {
+        width: 18px;
+        height: 18px;
+      }
+      .text-swatch {
+        width: 16px;
+        height: 16px;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="app" id="app">
+  <!-- 移动端 Gist 面板折叠开关 -->
+  <button class="gist-toggle" id="gistToggle" aria-label="展开/收起同步设置">
+    ☁️ 同步设置 ▾
+  </button>
   <!-- 顶部 GitHub Gist 同步面板 -->
-  <div class="gist-panel">
-    <input type="text" id="gistToken" placeholder="GitHub Token (gist 权限)" autocomplete="off">
-    <input type="text" id="gistId" placeholder="Gist ID (不填则创建新的)" autocomplete="off">
-    <button id="saveGistBtn" class="small-btn save-btn" title="保存 Token 和 Gist ID 到本地">💾 保存</button>
-    <button id="testGistBtn" class="small-btn" title="测试 Token 是否有效">🔍 测试连接</button>
-    <button id="uploadGistBtn" class="primary" title="上传/更新 Gist">⬆️ 上传</button>
-    <button id="downloadGistBtn" class="primary" title="从 Gist 下载">⬇️ 下载</button>
+  <div class="gist-panel" id="gistPanel">
+    <input type="text" id="gistToken" placeholder="GitHub Token" autocomplete="off">
+    <input type="text" id="gistId" placeholder="Gist ID (不填则创建)" autocomplete="off">
+    <button id="saveGistBtn" class="small-btn save-btn" title="保存到本地">💾 保存</button>
+    <button id="testGistBtn" class="small-btn" title="测试连接">🔍 测试</button>
+    <button id="uploadGistBtn" class="primary" title="上传">⬆️ 上传</button>
+    <button id="downloadGistBtn" class="primary" title="下载">⬇️ 下载</button>
   </div>
 
   <!-- 标签栏 -->
   <div class="tabs-bar" id="tabsBar"></div>
 
+  <!-- 移动端工具栏折叠开关 -->
+  <button class="toolbar-toggle" id="toolbarToggle" aria-label="展开/收起格式工具栏">
+    🎨 格式工具栏 ▾
+  </button>
+
   <!-- 固定工具栏 -->
-  <div class="toolbar">
-    <!-- 标签颜色设置：红橙黄绿黑白 -->
+  <div class="toolbar" id="toolbar">
+    <!-- 标签颜色设置 -->
     <div class="tab-color-area">
-      <span class="label">🏷️ 标签色</span>
-      <input type="color" id="tabColorPicker" value="#f0f3f9" title="自定义标签颜色" style="width:28px;height:28px;border:none;background:transparent;cursor:pointer;padding:0;">
+      <span class="label">🏷️ 标签</span>
+      <input type="color" id="tabColorPicker" value="#f0f3f9" title="自定义标签颜色" style="width:26px;height:26px;border:none;background:transparent;cursor:pointer;padding:0;">
       <button class="confirm-color-btn" id="applyTabColorBtn">确定</button>
       <div class="swatch-group" id="tabSwatchGroup">
         <div class="swatch" data-color="#e74c3c" style="background:#e74c3c;" title="红"></div>
@@ -421,12 +575,12 @@
       </div>
     </div>
 
-    <!-- 文字格式：加粗 + 文字颜色 + 字体大小 -->
+    <!-- 文字格式 -->
     <div class="format-group">
-      <button class="format-btn bold-btn" id="boldBtn" title="加粗选中文字 (Ctrl+B)">B 加粗</button>
+      <button class="format-btn bold-btn" id="boldBtn" title="加粗 (Ctrl+B)">B</button>
       <div class="text-color-area">
         <span class="label">🎨 字色</span>
-        <input type="color" id="textColorPicker" value="#ff0000" title="自定义文字颜色" style="width:26px;height:26px;border:none;background:transparent;cursor:pointer;padding:0;">
+        <input type="color" id="textColorPicker" value="#ff0000" title="自定义文字颜色" style="width:24px;height:24px;border:none;background:transparent;cursor:pointer;padding:0;">
         <button class="confirm-color-btn" id="applyTextColorBtn">确定</button>
         <div class="text-swatch-group" id="textSwatchGroup">
           <div class="text-swatch" data-color="#000000" style="background:#000000;" title="黑色"></div>
@@ -437,30 +591,30 @@
           <div class="text-swatch" data-color="#9900cc" style="background:#9900cc;" title="紫色"></div>
         </div>
       </div>
-      <!-- 字体大小（仅对选中内容生效） -->
       <div class="font-size-area">
         <span class="label">Aa</span>
-        <select id="fontSizeSelect" title="字体大小（选中文字后应用）">
-          <option value="12px">12px</option>
-          <option value="13px">13px</option>
-          <option value="14px">14px</option>
-          <option value="15px" selected>15px</option>
-          <option value="16px">16px</option>
-          <option value="18px">18px</option>
-          <option value="20px">20px</option>
-          <option value="24px">24px</option>
-          <option value="28px">28px</option>
-          <option value="32px">32px</option>
+        <select id="fontSizeSelect" title="字体大小">
+          <option value="12px">12</option>
+          <option value="13px">13</option>
+          <option value="14px">14</option>
+          <option value="15px" selected>15</option>
+          <option value="16px">16</option>
+          <option value="18px">18</option>
+          <option value="20px">20</option>
+          <option value="24px">24</option>
+          <option value="28px">28</option>
+          <option value="32px">32</option>
         </select>
       </div>
     </div>
 
     <div class="spacer"></div>
 
-    <!-- 导入导出 -->
-    <button id="exportJsonBtn" title="导出为JSON">📤 导出</button>
-    <button id="importJsonBtn" title="导入JSON">📥 导入</button>
-    <input type="file" id="importFileInput" accept=".json,application/json">
+    <div class="io-group">
+      <button id="exportJsonBtn" title="导出为JSON">📤 导出</button>
+      <button id="importJsonBtn" title="导入JSON">📥 导入</button>
+      <input type="file" id="importFileInput" accept=".json,application/json">
+    </div>
   </div>
 
   <!-- 编辑区 -->
@@ -477,11 +631,10 @@
     // ---------- 数据状态 ----------
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v5';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v6';
     const TOKEN_KEY = 'lightweight_gist_token';
     const GISTID_KEY = 'lightweight_gist_id';
 
-    // 保存的选区
     let savedRange = null;
 
     // DOM 元素
@@ -505,6 +658,20 @@
     const statusToast = document.getElementById('statusToast');
     const tabSwatchGroup = document.getElementById('tabSwatchGroup');
     const textSwatchGroup = document.getElementById('textSwatchGroup');
+    const gistToggle = document.getElementById('gistToggle');
+    const gistPanel = document.getElementById('gistPanel');
+    const toolbarToggle = document.getElementById('toolbarToggle');
+    const toolbar = document.getElementById('toolbar');
+
+    // ---------- 移动端折叠逻辑 ----------
+    gistToggle.addEventListener('click', () => {
+      const isOpen = gistPanel.classList.toggle('open');
+      gistToggle.textContent = isOpen ? '☁️ 同步设置 ▴' : '☁️ 同步设置 ▾';
+    });
+    toolbarToggle.addEventListener('click', () => {
+      const isOpen = toolbar.classList.toggle('open');
+      toolbarToggle.textContent = isOpen ? '🎨 格式工具栏 ▴' : '🎨 格式工具栏 ▾';
+    });
 
     // ---------- 工具函数 ----------
     function showToast(message, type = 'success') {
@@ -520,7 +687,6 @@
       return Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
     }
 
-    // 保存当前编辑器内的选区
     function saveSelection() {
       const selection = window.getSelection();
       if (selection.rangeCount > 0 && editor.contains(selection.anchorNode)) {
@@ -528,7 +694,6 @@
       }
     }
 
-    // 恢复保存的选区，成功返回 true
     function restoreSelection() {
       if (savedRange) {
         const selection = window.getSelection();
@@ -577,7 +742,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- Token 和 Gist ID 会自动保存到本地'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 移动端可点击上方开关展开工具栏'
       }];
       activeTabId = defaultId;
     }
@@ -618,7 +783,7 @@
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = tab.name;
-        nameSpan.style.maxWidth = '100px';
+        nameSpan.style.maxWidth = '90px';
         nameSpan.style.overflow = 'hidden';
         nameSpan.style.textOverflow = 'ellipsis';
         nameSpan.style.whiteSpace = 'nowrap';
@@ -742,7 +907,6 @@
       }
     }
 
-    // 加粗
     function applyBold() {
       if (!restoreSelection()) {
         const selection = window.getSelection();
@@ -758,7 +922,6 @@
       saveSelection();
     }
 
-    // 应用文字颜色（对选中文字）
     function applyTextColor(color) {
       if (!restoreSelection()) {
         const selection = window.getSelection();
@@ -774,7 +937,6 @@
       saveSelection();
     }
 
-    // 应用字体大小（仅对选中文字）
     function applyFontSize(size) {
       if (!restoreSelection()) {
         const selection = window.getSelection();
@@ -804,27 +966,23 @@
       saveSelection();
     }
 
-    // ---------- Gist 面板：保存与恢复 ----------
+    // ---------- Gist 面板保存 ----------
     function saveGistCredentials() {
       localStorage.setItem(TOKEN_KEY, gistToken.value.trim());
       localStorage.setItem(GISTID_KEY, gistId.value.trim());
     }
 
-    // 自动保存（输入时）
     gistToken.addEventListener('input', saveGistCredentials);
     gistId.addEventListener('input', saveGistCredentials);
-    // 失焦时再保存一次（防止输入法未触发 input 的情况）
     gistToken.addEventListener('blur', saveGistCredentials);
     gistId.addEventListener('blur', saveGistCredentials);
 
-    // 手动保存按钮
     saveGistBtn.addEventListener('click', () => {
       saveGistCredentials();
       showToast('✅ Token 和 Gist ID 已保存到本地', 'success');
     });
 
     // ---------- 事件绑定 ----------
-    // 编辑器内实时保存选区
     editor.addEventListener('mouseup', saveSelection);
     editor.addEventListener('keyup', saveSelection);
     editor.addEventListener('blur', () => {
@@ -832,14 +990,12 @@
       saveToLocal();
     });
 
-    // 标签颜色自定义调色板（点击确定按钮应用）
     applyTabColorBtn.addEventListener('click', () => {
       const color = tabColorPicker.value;
       setActiveTabColor(color);
       showToast(`标签颜色已设为 ${color}`, 'success');
     });
 
-    // 标签基本色块点击（直接应用）
     tabSwatchGroup.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
@@ -853,7 +1009,6 @@
       }
     });
 
-    // 加粗按钮 —— mousedown 阻止默认，防止抢焦点
     boldBtn.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
@@ -862,7 +1017,6 @@
       applyBold();
     });
 
-    // 文字颜色自定义调色板（点击确定按钮应用）
     applyTextColorBtn.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
@@ -871,7 +1025,6 @@
       applyTextColor(color);
     });
 
-    // 文字基本色块点击（直接应用）—— mousedown 阻止默认防止选区丢失
     textSwatchGroup.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
@@ -885,7 +1038,6 @@
       }
     });
 
-    // 字体大小选择 —— 先保存选区，change 时应用
     fontSizeSelect.addEventListener('mousedown', () => {
       saveSelection();
     });
@@ -894,7 +1046,6 @@
       applyFontSize(size);
     });
 
-    // 编辑器输入保存
     let saveTimeout;
     editor.addEventListener('input', () => {
       syncEditorToActiveTab();
@@ -908,7 +1059,7 @@
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 5,
+        version: 6,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -922,7 +1073,6 @@
       showToast('已导出 JSON', 'success');
     });
 
-    // 导入JSON
     importJsonBtn.addEventListener('click', () => {
       importFileInput.click();
     });
@@ -998,7 +1148,7 @@
         showToast(`连接失败: ${err.message}`, 'error');
       } finally {
         testGistBtn.disabled = false;
-        testGistBtn.textContent = '🔍 测试连接';
+        testGistBtn.textContent = '🔍 测试';
       }
     });
 
@@ -1013,7 +1163,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 5,
+        version: 6,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -1035,7 +1185,6 @@
           const body = { description: '轻量多标签笔记同步', public: false, files };
           result = await gistRequest(token, null, 'POST', body);
           gistId.value = result.id;
-          // 保存新创建的 gist id
           localStorage.setItem(GISTID_KEY, result.id);
           showToast(`✅ 已创建新 Gist (ID: ${result.id})`, 'success');
         }
@@ -1100,7 +1249,6 @@
       }
     });
 
-    // 快捷键 Ctrl+B
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         if (editor.contains(document.activeElement) || document.activeElement === editor) {
@@ -1119,7 +1267,6 @@
         activeTabId = tabs[0]?.id || null;
       }
 
-      // 恢复保存的 token 和 gist id
       const savedToken = localStorage.getItem(TOKEN_KEY);
       const savedGistId = localStorage.getItem(GISTID_KEY);
       if (savedToken) gistToken.value = savedToken;
