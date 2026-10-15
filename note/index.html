@@ -517,7 +517,6 @@
       border-color: #2a6df4;
       box-shadow: 0 0 0 3px rgba(42, 109, 244, 0.1);
     }
-    /* 编辑器内的搜索高亮 */
     .editor mark.search-highlight {
       background: #ffe066;
       color: #000;
@@ -639,7 +638,6 @@
         font-size: 15px;
       }
 
-      /* 移动端搜索栏紧凑 */
       .search-bar {
         padding: 5px 8px;
         gap: 6px;
@@ -788,7 +786,7 @@
     const GISTID_KEY = 'lightweight_gist_id';
 
     let savedRange = null;
-    let searchResultsList = []; // 当前搜索结果
+    let searchResultsList = [];
 
     // DOM 元素
     const tabsBar = document.getElementById('tabsBar');
@@ -845,19 +843,16 @@
       return Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
     }
 
-    // 将 HTML 内容转为纯文本
     function htmlToText(html) {
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
       return tmp.textContent || tmp.innerText || '';
     }
 
-    // 转义正则特殊字符
     function escapeRegExp(str) {
       return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // 转义 HTML（用于搜索结果展示）
     function escapeHtml(str) {
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
@@ -946,7 +941,6 @@
         activeTabId = tabs[0].id;
       }
 
-      // 记录有搜索结果的标签
       const resultTabIds = new Set(searchResultsList.map(r => r.tabId));
 
       tabsBar.innerHTML = '';
@@ -1045,7 +1039,6 @@
         activeTabId = newActive.id;
       }
       savedRange = null;
-      // 移除已关闭标签的搜索结果
       searchResultsList = searchResultsList.filter(r => r.tabId !== tabId);
       saveToLocal();
       renderTabs();
@@ -1150,7 +1143,6 @@
     // ---------- 搜索功能 ----------
     function performSearch() {
       const keyword = searchInput.value.trim();
-      // 先同步当前编辑器内容到标签数据
       syncEditorToActiveTab();
 
       if (!keyword) {
@@ -1177,24 +1169,21 @@
 
         while ((matchIndex = lowerText.indexOf(lowerKeyword, fromIndex)) !== -1) {
           matchCount++;
-          // 记录匹配位置的上下文（前后 30 个字符）
           const start = Math.max(0, matchIndex - 30);
           const end = Math.min(plainText.length, matchIndex + keyword.length + 30);
           let snippet = plainText.substring(start, end);
-          // 高亮关键字
           const regex = new RegExp(escapeRegExp(keyword), 'gi');
           snippet = escapeHtml(snippet).replace(regex, m => `<mark>${m}</mark>`);
 
           matches.push({
-            index: matchIndex,
+            index: matches.length, // 该标签内的正序序号，从 0 开始
             snippet: snippet,
             prefix: start > 0 ? '…' : '',
             suffix: end < plainText.length ? '…' : ''
           });
 
           fromIndex = matchIndex + keyword.length;
-          // 每个标签最多记录 10 个匹配，避免列表过长
-          if (matches.length >= 10) break;
+          if (matches.length >= 10) break; // 每标签最多展示 10 条
         }
 
         if (matchCount > 0) {
@@ -1214,10 +1203,7 @@
       const totalMatches = results.reduce((sum, r) => sum + r.matchCount, 0);
       searchCount.textContent = totalMatches > 0 ? `${totalMatches} 处` : '无结果';
 
-      // 高亮当前激活标签中的匹配内容
       highlightInEditor(keyword);
-
-      // 更新标签栏，标记有结果的标签
       renderTabs();
 
       if (totalMatches === 0) {
@@ -1251,7 +1237,6 @@
       searchResults.innerHTML = html;
       searchResults.classList.add('open');
 
-      // 点击结果项跳转
       searchResults.querySelectorAll('.search-result-item').forEach(item => {
         item.addEventListener('click', () => {
           const tabId = item.dataset.tabId;
@@ -1261,12 +1246,10 @@
       });
     }
 
-    // 跳转到指定标签的匹配位置
+    // 跳转到指定标签的匹配位置（matchIndex 是该标签内的第几个匹配，从 0 开始）
     function jumpToResult(tabId, matchIndex) {
-      // 先同步当前编辑器
       syncEditorToActiveTab();
 
-      // 切换标签
       if (tabId !== activeTabId) {
         activeTabId = tabId;
         savedRange = null;
@@ -1276,20 +1259,20 @@
         saveToLocal();
       }
 
-      // 高亮并滚动到匹配位置
       const keyword = searchInput.value.trim();
       highlightInEditor(keyword, matchIndex);
 
-      // 关闭结果下拉
       searchResults.classList.remove('open');
     }
 
-    // 在编辑器中高亮关键字，并可定位到某个匹配
-    function highlightInEditor(keyword, targetMatchIndex) {
+    // 在编辑器中高亮关键字，并可定位到该标签内的第 targetLocalIndex 个匹配
+    function highlightInEditor(keyword, targetLocalIndex) {
       clearEditorHighlights();
       if (!keyword) return;
 
       const regex = new RegExp(escapeRegExp(keyword), 'gi');
+
+      // 1. 收集所有文本节点
       const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
       const textNodes = [];
       let node;
@@ -1297,52 +1280,64 @@
         textNodes.push(node);
       }
 
-      let globalMatchCount = 0;
-      let targetNode = null;
-      let targetOffset = 0;
-
+      // 2. 收集所有匹配 { node, start, end }，按文档顺序（正序）
+      const allMatches = [];
       textNodes.forEach(textNode => {
         const text = textNode.nodeValue;
-        let match;
         regex.lastIndex = 0;
-        const matches = [];
+        let match;
         while ((match = regex.exec(text)) !== null) {
-          matches.push({ index: match.index, length: match[0].length });
+          allMatches.push({
+            node: textNode,
+            start: match.index,
+            end: match.index + match[0].length
+          });
           if (match[0].length === 0) break;
         }
+      });
 
-        // 从后往前替换，避免影响索引
+      if (allMatches.length === 0) return;
+
+      // 3. 按节点分组，同节点内从后往前替换，避免影响前面的索引
+      const matchesByNode = new Map();
+      allMatches.forEach(m => {
+        if (!matchesByNode.has(m.node)) matchesByNode.set(m.node, []);
+        matchesByNode.get(m.node).push(m);
+      });
+
+      // 4. 按文档顺序遍历节点进行替换
+      textNodes.forEach(textNode => {
+        const matches = matchesByNode.get(textNode);
+        if (!matches || matches.length === 0) return;
+
+        // 从后往前替换，保证同一节点内的索引不受影响
         for (let i = matches.length - 1; i >= 0; i--) {
           const m = matches[i];
           const range = document.createRange();
-          range.setStart(textNode, m.index);
-          range.setEnd(textNode, m.index + m.length);
+          range.setStart(textNode, m.start);
+          range.setEnd(textNode, m.end);
 
           const mark = document.createElement('mark');
           mark.className = 'search-highlight';
           try {
             range.surroundContents(mark);
           } catch (e) {
-            continue;
+            // 如果跨节点等异常，跳过
           }
-
-          // 判断是否是目标匹配（用于滚动定位）
-          if (targetMatchIndex !== undefined && globalMatchCount === targetMatchIndex) {
-            targetNode = mark;
-            targetOffset = 0;
-          }
-          globalMatchCount++;
         }
       });
 
-      // 滚动到目标匹配
-      if (targetNode) {
-        targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // 短暂闪烁效果
-        targetNode.style.transition = 'background 0.3s';
-        targetNode.style.background = '#ffaa00';
+      // 5. 替换完成后，querySelectorAll 返回的 mark 已经是文档顺序
+      const marks = Array.from(editor.querySelectorAll('mark.search-highlight'));
+
+      // 6. 定位到目标匹配
+      if (targetLocalIndex !== undefined && targetLocalIndex >= 0 && targetLocalIndex < marks.length) {
+        const targetMark = marks[targetLocalIndex];
+        targetMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetMark.style.transition = 'background 0.3s';
+        targetMark.style.background = '#ffaa00';
         setTimeout(() => {
-          targetNode.style.background = '';
+          targetMark.style.background = '';
         }, 800);
       }
     }
@@ -1356,7 +1351,6 @@
         }
         parent.removeChild(mark);
       });
-      // 规范化，合并相邻文本节点
       editor.normalize();
     }
 
@@ -1458,7 +1452,6 @@
         performSearch();
       }
     });
-    // 输入时实时搜索（防抖）
     let searchTimeout;
     searchInput.addEventListener('input', () => {
       clearTimeout(searchTimeout);
@@ -1472,13 +1465,11 @@
     });
     clearSearchBtn.addEventListener('click', clearSearch);
 
-    // 点击页面其他位置关闭搜索结果下拉
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-bar')) {
         searchResults.classList.remove('open');
       }
     });
-    // 点击搜索框时重新打开结果
     searchInput.addEventListener('focus', () => {
       if (searchResultsList.length && searchInput.value.trim()) {
         searchResults.classList.add('open');
@@ -1493,7 +1484,6 @@
       saveTimeout = setTimeout(() => {
         saveToLocal();
       }, 300);
-      // 如果搜索框有内容，重新搜索以更新结果
       if (searchInput.value.trim()) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
@@ -1709,7 +1699,6 @@
           applyBold();
         }
       }
-      // Ctrl+F 聚焦搜索框
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
         searchInput.focus();
