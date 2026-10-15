@@ -32,10 +32,10 @@
       flex-direction: column;
       overflow: hidden;
       height: 100vh;
-      height: 100dvh; /* 移动端动态视口高度 */
+      height: 100dvh;
     }
 
-    /* 顶部 Gist 同步面板 —— 桌面端完整展示，移动端折叠 */
+    /* 顶部 Gist 同步面板 */
     .gist-panel {
       display: flex;
       flex-wrap: wrap;
@@ -91,7 +91,6 @@
       background: #c8e6c9;
     }
 
-    /* Gist 面板的折叠开关（移动端显示） */
     .gist-toggle {
       display: none;
       width: 100%;
@@ -147,6 +146,10 @@
       box-shadow: 0 2px 8px rgba(42, 109, 244, 0.2);
       background: #ffffff;
     }
+    .tab.has-result {
+      background: #fffbe6;
+      border-color: #f0c040;
+    }
     .tab-color-indicator {
       width: 11px;
       height: 11px;
@@ -188,7 +191,128 @@
       background: #c0cee2;
     }
 
-    /* 工具栏 —— 桌面端一行，移动端可折叠紧凑显示 */
+    /* 搜索栏 */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #f9fbfe;
+      border-bottom: 1px solid #d9e1ec;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 9;
+    }
+    .search-bar input[type="text"] {
+      flex: 1;
+      padding: 6px 12px;
+      border-radius: 30px;
+      border: 1px solid #b8c6db;
+      font-family: inherit;
+      font-size: 13px;
+      background: white;
+      min-width: 0;
+      outline: none;
+    }
+    .search-bar input[type="text"]:focus {
+      border-color: #2a6df4;
+      box-shadow: 0 0 0 2px rgba(42, 109, 244, 0.15);
+    }
+    .search-bar button {
+      padding: 5px 12px;
+      border-radius: 30px;
+      border: 1px solid #b8c6db;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 13px;
+      transition: 0.1s;
+      white-space: nowrap;
+    }
+    .search-bar button:hover {
+      background: #d9e1ec;
+    }
+    .search-bar button.primary {
+      background: #2a6df4;
+      border-color: #2a6df4;
+      color: white;
+    }
+    .search-bar button.primary:hover {
+      background: #1a5ae0;
+    }
+    .search-count {
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    /* 搜索结果下拉列表 */
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 12px;
+      right: 12px;
+      background: white;
+      border: 1px solid #b8c6db;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .search-results.open {
+      display: block;
+    }
+    .search-result-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f3f9;
+      transition: 0.1s;
+      font-size: 13px;
+    }
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    .search-result-item:hover {
+      background: #eef4ff;
+    }
+    .search-result-item .result-tab {
+      font-weight: 600;
+      color: #2a6df4;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-result-item .result-tab .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      flex-shrink: 0;
+    }
+    .search-result-item .result-text {
+      color: #555;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .search-result-item .result-text mark {
+      background: #ffe066;
+      color: #000;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+    .search-no-result {
+      padding: 16px;
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+    }
+
+    /* 工具栏 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -204,7 +328,6 @@
       z-index: 10;
     }
 
-    /* 移动端工具栏折叠开关 */
     .toolbar-toggle {
       display: none;
       width: 100%;
@@ -220,7 +343,6 @@
       flex-shrink: 0;
     }
 
-    /* 标签颜色区域 */
     .tab-color-area {
       display: flex;
       align-items: center;
@@ -270,7 +392,6 @@
       background: #d9e1ec;
     }
 
-    /* 文字颜色区域 */
     .text-color-area {
       display: flex;
       align-items: center;
@@ -304,7 +425,6 @@
       border-color: #2a6df4;
     }
 
-    /* 字体大小区域 */
     .font-size-area {
       display: flex;
       align-items: center;
@@ -359,7 +479,6 @@
       flex: 1;
     }
 
-    /* 导入导出按钮 */
     .io-group {
       display: flex;
       gap: 5px;
@@ -367,7 +486,7 @@
       flex-shrink: 0;
     }
 
-    /* 编辑器区域 —— 占据剩余空间，保证至少 80% 页面高度 */
+    /* 编辑器区域 */
     .editor-container {
       padding: 10px 14px;
       background: white;
@@ -397,6 +516,14 @@
     .editor:focus {
       border-color: #2a6df4;
       box-shadow: 0 0 0 3px rgba(42, 109, 244, 0.1);
+    }
+    /* 编辑器内的搜索高亮 */
+    .editor mark.search-highlight {
+      background: #ffe066;
+      color: #000;
+      padding: 0 2px;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px #f0c040;
     }
 
     /* 状态提示 */
@@ -443,7 +570,6 @@
         height: 100dvh;
       }
 
-      /* Gist 面板折叠 —— 默认隐藏，点击开关展开 */
       .gist-toggle {
         display: block;
       }
@@ -466,7 +592,6 @@
         font-size: 12px;
       }
 
-      /* 工具栏折叠 —— 默认隐藏，点击开关展开 */
       .toolbar-toggle {
         display: block;
       }
@@ -479,7 +604,6 @@
         display: flex;
       }
 
-      /* 移动端控件更紧凑 */
       .tab-color-area,
       .text-color-area,
       .font-size-area {
@@ -506,7 +630,6 @@
         margin-left: auto;
       }
 
-      /* 编辑器区域最大化 */
       .editor-container {
         padding: 6px 8px;
       }
@@ -515,9 +638,31 @@
         border-radius: 12px;
         font-size: 15px;
       }
+
+      /* 移动端搜索栏紧凑 */
+      .search-bar {
+        padding: 5px 8px;
+        gap: 6px;
+      }
+      .search-bar input[type="text"] {
+        font-size: 13px;
+        padding: 5px 10px;
+      }
+      .search-bar button {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+      .search-count {
+        font-size: 11px;
+        min-width: 50px;
+      }
+      .search-results {
+        left: 8px;
+        right: 8px;
+        max-height: 40vh;
+      }
     }
 
-    /* 超小屏进一步紧凑 */
     @media (max-width: 400px) {
       .gist-panel button {
         font-size: 11px;
@@ -553,6 +698,15 @@
   <!-- 标签栏 -->
   <div class="tabs-bar" id="tabsBar"></div>
 
+  <!-- 搜索栏 -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 在所有标签页中搜索关键字..." autocomplete="off">
+    <button id="searchBtn" class="primary">搜索</button>
+    <button id="clearSearchBtn">清除</button>
+    <span class="search-count" id="searchCount"></span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
   <!-- 移动端工具栏折叠开关 -->
   <button class="toolbar-toggle" id="toolbarToggle" aria-label="展开/收起格式工具栏">
     🎨 格式工具栏 ▾
@@ -560,7 +714,6 @@
 
   <!-- 固定工具栏 -->
   <div class="toolbar" id="toolbar">
-    <!-- 标签颜色设置 -->
     <div class="tab-color-area">
       <span class="label">🏷️ 标签</span>
       <input type="color" id="tabColorPicker" value="#f0f3f9" title="自定义标签颜色" style="width:26px;height:26px;border:none;background:transparent;cursor:pointer;padding:0;">
@@ -575,7 +728,6 @@
       </div>
     </div>
 
-    <!-- 文字格式 -->
     <div class="format-group">
       <button class="format-btn bold-btn" id="boldBtn" title="加粗 (Ctrl+B)">B</button>
       <div class="text-color-area">
@@ -631,11 +783,12 @@
     // ---------- 数据状态 ----------
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v6';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v7';
     const TOKEN_KEY = 'lightweight_gist_token';
     const GISTID_KEY = 'lightweight_gist_id';
 
     let savedRange = null;
+    let searchResultsList = []; // 当前搜索结果
 
     // DOM 元素
     const tabsBar = document.getElementById('tabsBar');
@@ -662,8 +815,13 @@
     const gistPanel = document.getElementById('gistPanel');
     const toolbarToggle = document.getElementById('toolbarToggle');
     const toolbar = document.getElementById('toolbar');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchCount = document.getElementById('searchCount');
+    const searchResults = document.getElementById('searchResults');
 
-    // ---------- 移动端折叠逻辑 ----------
+    // ---------- 移动端折叠 ----------
     gistToggle.addEventListener('click', () => {
       const isOpen = gistPanel.classList.toggle('open');
       gistToggle.textContent = isOpen ? '☁️ 同步设置 ▴' : '☁️ 同步设置 ▾';
@@ -685,6 +843,23 @@
 
     function genId() {
       return Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+    }
+
+    // 将 HTML 内容转为纯文本
+    function htmlToText(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+
+    // 转义正则特殊字符
+    function escapeRegExp(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // 转义 HTML（用于搜索结果展示）
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function saveSelection() {
@@ -742,7 +917,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 移动端可点击上方开关展开工具栏'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 使用搜索框可在所有标签中查找关键字'
       }];
       activeTabId = defaultId;
     }
@@ -771,10 +946,13 @@
         activeTabId = tabs[0].id;
       }
 
+      // 记录有搜索结果的标签
+      const resultTabIds = new Set(searchResultsList.map(r => r.tabId));
+
       tabsBar.innerHTML = '';
       tabs.forEach(tab => {
         const tabEl = document.createElement('div');
-        tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
+        tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''} ${resultTabIds.has(tab.id) ? 'has-result' : ''}`;
         tabEl.dataset.id = tab.id;
 
         const colorDot = document.createElement('span');
@@ -867,10 +1045,13 @@
         activeTabId = newActive.id;
       }
       savedRange = null;
+      // 移除已关闭标签的搜索结果
+      searchResultsList = searchResultsList.filter(r => r.tabId !== tabId);
       saveToLocal();
       renderTabs();
       updateEditorFromActiveTab();
       updateColorPickerFromActiveTab();
+      updateSearchResultsDisplay();
     }
 
     function syncEditorToActiveTab() {
@@ -966,6 +1147,230 @@
       saveSelection();
     }
 
+    // ---------- 搜索功能 ----------
+    function performSearch() {
+      const keyword = searchInput.value.trim();
+      // 先同步当前编辑器内容到标签数据
+      syncEditorToActiveTab();
+
+      if (!keyword) {
+        searchResultsList = [];
+        updateSearchResultsDisplay();
+        searchCount.textContent = '';
+        renderTabs();
+        clearEditorHighlights();
+        return;
+      }
+
+      const lowerKeyword = keyword.toLowerCase();
+      const results = [];
+
+      tabs.forEach(tab => {
+        const plainText = htmlToText(tab.content || '');
+        if (!plainText) return;
+        const lowerText = plainText.toLowerCase();
+
+        let fromIndex = 0;
+        let matchIndex;
+        let matchCount = 0;
+        const matches = [];
+
+        while ((matchIndex = lowerText.indexOf(lowerKeyword, fromIndex)) !== -1) {
+          matchCount++;
+          // 记录匹配位置的上下文（前后 30 个字符）
+          const start = Math.max(0, matchIndex - 30);
+          const end = Math.min(plainText.length, matchIndex + keyword.length + 30);
+          let snippet = plainText.substring(start, end);
+          // 高亮关键字
+          const regex = new RegExp(escapeRegExp(keyword), 'gi');
+          snippet = escapeHtml(snippet).replace(regex, m => `<mark>${m}</mark>`);
+
+          matches.push({
+            index: matchIndex,
+            snippet: snippet,
+            prefix: start > 0 ? '…' : '',
+            suffix: end < plainText.length ? '…' : ''
+          });
+
+          fromIndex = matchIndex + keyword.length;
+          // 每个标签最多记录 10 个匹配，避免列表过长
+          if (matches.length >= 10) break;
+        }
+
+        if (matchCount > 0) {
+          results.push({
+            tabId: tab.id,
+            tabName: tab.name,
+            tabColor: tab.color,
+            matchCount: matchCount,
+            matches: matches
+          });
+        }
+      });
+
+      searchResultsList = results;
+      updateSearchResultsDisplay();
+
+      const totalMatches = results.reduce((sum, r) => sum + r.matchCount, 0);
+      searchCount.textContent = totalMatches > 0 ? `${totalMatches} 处` : '无结果';
+
+      // 高亮当前激活标签中的匹配内容
+      highlightInEditor(keyword);
+
+      // 更新标签栏，标记有结果的标签
+      renderTabs();
+
+      if (totalMatches === 0) {
+        showToast('未找到匹配内容', 'error');
+      }
+    }
+
+    function updateSearchResultsDisplay() {
+      if (!searchResultsList.length || !searchInput.value.trim()) {
+        searchResults.classList.remove('open');
+        searchResults.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      searchResultsList.forEach(tabResult => {
+        tabResult.matches.forEach(m => {
+          html += `
+            <div class="search-result-item" data-tab-id="${tabResult.tabId}" data-index="${m.index}">
+              <div class="result-tab">
+                <span class="dot" style="background:${tabResult.tabColor || '#ddd'};"></span>
+                ${escapeHtml(tabResult.tabName)}
+                <span style="color:#999;font-weight:400;font-size:11px;">(${tabResult.matchCount}处匹配)</span>
+              </div>
+              <div class="result-text">${m.prefix}${m.snippet}${m.suffix}</div>
+            </div>
+          `;
+        });
+      });
+
+      searchResults.innerHTML = html;
+      searchResults.classList.add('open');
+
+      // 点击结果项跳转
+      searchResults.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const tabId = item.dataset.tabId;
+          const matchIndex = parseInt(item.dataset.index, 10);
+          jumpToResult(tabId, matchIndex);
+        });
+      });
+    }
+
+    // 跳转到指定标签的匹配位置
+    function jumpToResult(tabId, matchIndex) {
+      // 先同步当前编辑器
+      syncEditorToActiveTab();
+
+      // 切换标签
+      if (tabId !== activeTabId) {
+        activeTabId = tabId;
+        savedRange = null;
+        renderTabs();
+        updateEditorFromActiveTab();
+        updateColorPickerFromActiveTab();
+        saveToLocal();
+      }
+
+      // 高亮并滚动到匹配位置
+      const keyword = searchInput.value.trim();
+      highlightInEditor(keyword, matchIndex);
+
+      // 关闭结果下拉
+      searchResults.classList.remove('open');
+    }
+
+    // 在编辑器中高亮关键字，并可定位到某个匹配
+    function highlightInEditor(keyword, targetMatchIndex) {
+      clearEditorHighlights();
+      if (!keyword) return;
+
+      const regex = new RegExp(escapeRegExp(keyword), 'gi');
+      const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let node;
+      while (node = walker.nextNode()) {
+        textNodes.push(node);
+      }
+
+      let globalMatchCount = 0;
+      let targetNode = null;
+      let targetOffset = 0;
+
+      textNodes.forEach(textNode => {
+        const text = textNode.nodeValue;
+        let match;
+        regex.lastIndex = 0;
+        const matches = [];
+        while ((match = regex.exec(text)) !== null) {
+          matches.push({ index: match.index, length: match[0].length });
+          if (match[0].length === 0) break;
+        }
+
+        // 从后往前替换，避免影响索引
+        for (let i = matches.length - 1; i >= 0; i--) {
+          const m = matches[i];
+          const range = document.createRange();
+          range.setStart(textNode, m.index);
+          range.setEnd(textNode, m.index + m.length);
+
+          const mark = document.createElement('mark');
+          mark.className = 'search-highlight';
+          try {
+            range.surroundContents(mark);
+          } catch (e) {
+            continue;
+          }
+
+          // 判断是否是目标匹配（用于滚动定位）
+          if (targetMatchIndex !== undefined && globalMatchCount === targetMatchIndex) {
+            targetNode = mark;
+            targetOffset = 0;
+          }
+          globalMatchCount++;
+        }
+      });
+
+      // 滚动到目标匹配
+      if (targetNode) {
+        targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 短暂闪烁效果
+        targetNode.style.transition = 'background 0.3s';
+        targetNode.style.background = '#ffaa00';
+        setTimeout(() => {
+          targetNode.style.background = '';
+        }, 800);
+      }
+    }
+
+    // 清除编辑器中的高亮
+    function clearEditorHighlights() {
+      editor.querySelectorAll('mark.search-highlight').forEach(mark => {
+        const parent = mark.parentNode;
+        while (mark.firstChild) {
+          parent.insertBefore(mark.firstChild, mark);
+        }
+        parent.removeChild(mark);
+      });
+      // 规范化，合并相邻文本节点
+      editor.normalize();
+    }
+
+    // 清除搜索
+    function clearSearch() {
+      searchInput.value = '';
+      searchResultsList = [];
+      searchResults.classList.remove('open');
+      searchResults.innerHTML = '';
+      searchCount.textContent = '';
+      clearEditorHighlights();
+      renderTabs();
+    }
+
     // ---------- Gist 面板保存 ----------
     function saveGistCredentials() {
       localStorage.setItem(TOKEN_KEY, gistToken.value.trim());
@@ -1046,6 +1451,41 @@
       applyFontSize(size);
     });
 
+    // 搜索相关事件
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+    // 输入时实时搜索（防抖）
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        if (searchInput.value.trim()) {
+          performSearch();
+        } else {
+          clearSearch();
+        }
+      }, 300);
+    });
+    clearSearchBtn.addEventListener('click', clearSearch);
+
+    // 点击页面其他位置关闭搜索结果下拉
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-bar')) {
+        searchResults.classList.remove('open');
+      }
+    });
+    // 点击搜索框时重新打开结果
+    searchInput.addEventListener('focus', () => {
+      if (searchResultsList.length && searchInput.value.trim()) {
+        searchResults.classList.add('open');
+      }
+    });
+
+    // 编辑器输入保存
     let saveTimeout;
     editor.addEventListener('input', () => {
       syncEditorToActiveTab();
@@ -1053,13 +1493,20 @@
       saveTimeout = setTimeout(() => {
         saveToLocal();
       }, 300);
+      // 如果搜索框有内容，重新搜索以更新结果
+      if (searchInput.value.trim()) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          performSearch();
+        }, 500);
+      }
     });
 
     // 导出JSON
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 6,
+        version: 7,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -1093,10 +1540,13 @@
             }));
             activeTabId = tabs[0].id;
             savedRange = null;
+            searchResultsList = [];
             renderTabs();
             updateEditorFromActiveTab();
             updateColorPickerFromActiveTab();
             saveToLocal();
+            updateSearchResultsDisplay();
+            searchCount.textContent = '';
             showToast(`成功导入 ${tabs.length} 个标签`, 'success');
           } else {
             showToast('JSON 格式无效', 'error');
@@ -1163,7 +1613,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 6,
+        version: 7,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -1236,10 +1686,13 @@
         }));
         activeTabId = tabs[0].id;
         savedRange = null;
+        searchResultsList = [];
         renderTabs();
         updateEditorFromActiveTab();
         updateColorPickerFromActiveTab();
         saveToLocal();
+        updateSearchResultsDisplay();
+        searchCount.textContent = '';
         showToast(`✅ 已从 Gist 下载 ${tabs.length} 个标签`, 'success');
       } catch (err) {
         showToast(`下载失败: ${err.message}`, 'error');
@@ -1255,6 +1708,12 @@
           e.preventDefault();
           applyBold();
         }
+      }
+      // Ctrl+F 聚焦搜索框
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
       }
     });
 
