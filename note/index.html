@@ -92,7 +92,6 @@
       background: #c8e6c9;
     }
 
-    /* 自动下载开关 */
     .auto-sync-label {
       display: flex;
       align-items: center;
@@ -218,7 +217,7 @@
       background: #c0cee2;
     }
 
-    /* 搜索栏 */
+    /* 搜索栏 — z-index 提高到 30，确保下拉框在工具栏之上 */
     .search-bar {
       display: flex;
       align-items: center;
@@ -228,7 +227,7 @@
       border-bottom: 1px solid #d9e1ec;
       flex-shrink: 0;
       position: relative;
-      z-index: 9;
+      z-index: 30;
     }
     .search-bar input[type="text"] {
       flex: 1;
@@ -277,7 +276,7 @@
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* 搜索结果下拉列表 */
+    /* 搜索结果下拉列表 — z-index 200，确保最上层 */
     .search-results {
       position: absolute;
       top: 100%;
@@ -289,7 +288,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
       max-height: 300px;
       overflow-y: auto;
-      z-index: 100;
+      z-index: 200;
       display: none;
     }
     .search-results.open {
@@ -343,7 +342,7 @@
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* 工具栏 */
+    /* 工具栏 — z-index 降低为 8，低于搜索栏 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -356,7 +355,7 @@
       flex-shrink: 0;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 8;
     }
 
     .toolbar-toggle {
@@ -559,7 +558,6 @@
       background: #ffffff;
       outline: none;
       overflow-y: auto;
-      /* 统一使用微软雅黑字体 */
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
       white-space: pre-wrap;
       word-break: break-word;
@@ -570,7 +568,6 @@
       border-color: #2a6df4;
       box-shadow: 0 0 0 3px rgba(42, 109, 244, 0.1);
     }
-    /* 强制编辑器内所有元素都继承雅黑字体 */
     .editor * {
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
     }
@@ -737,11 +734,9 @@
 </head>
 <body>
 <div class="app" id="app">
-  <!-- 移动端 Gist 面板折叠开关 -->
   <button class="gist-toggle" id="gistToggle" aria-label="展开/收起同步设置">
     ☁️ 同步设置 ▾
   </button>
-  <!-- 顶部 GitHub Gist 同步面板 -->
   <div class="gist-panel" id="gistPanel">
     <input type="text" id="gistToken" placeholder="GitHub Token" autocomplete="off">
     <input type="text" id="gistId" placeholder="Gist ID (不填则创建)" autocomplete="off">
@@ -755,10 +750,8 @@
     </label>
   </div>
 
-  <!-- 标签栏 -->
   <div class="tabs-bar" id="tabsBar"></div>
 
-  <!-- 搜索栏 -->
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="🔍 在所有标签页中搜索关键字..." autocomplete="off">
     <button id="searchBtn" class="primary">搜索</button>
@@ -767,12 +760,10 @@
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- 移动端工具栏折叠开关 -->
   <button class="toolbar-toggle" id="toolbarToggle" aria-label="展开/收起格式工具栏">
     🎨 格式工具栏 ▾
   </button>
 
-  <!-- 固定工具栏 -->
   <div class="toolbar" id="toolbar">
     <div class="tab-color-area">
       <span class="label">🏷️ 标签</span>
@@ -829,18 +820,15 @@
     </div>
   </div>
 
-  <!-- 编辑区 -->
   <div class="editor-container">
     <div class="editor" id="editor" contenteditable="true" spellcheck="false"></div>
   </div>
 </div>
 
-<!-- 全局通知 -->
 <div id="statusToast" class="status-toast"></div>
 
 <script>
   (function() {
-    // ---------- 数据状态 ----------
     let tabs = [];
     let activeTabId = null;
     const STORAGE_KEY = 'lightweight_tabs_notes_v9';
@@ -851,7 +839,6 @@
     let savedRange = null;
     let searchResultsList = [];
 
-    // DOM 元素
     const tabsBar = document.getElementById('tabsBar');
     const editor = document.getElementById('editor');
     const tabColorPicker = document.getElementById('tabColorPicker');
@@ -883,10 +870,8 @@
     const searchCount = document.getElementById('searchCount');
     const searchResults = document.getElementById('searchResults');
 
-    // 统一字体栈
     const FONT_STACK = '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif';
 
-    // ---------- 移动端折叠 ----------
     gistToggle.addEventListener('click', () => {
       const isOpen = gistPanel.classList.toggle('open');
       gistToggle.textContent = isOpen ? '☁️ 同步设置 ▴' : '☁️ 同步设置 ▾';
@@ -896,7 +881,6 @@
       toolbarToggle.textContent = isOpen ? '🎨 格式工具栏 ▴' : '🎨 格式工具栏 ▾';
     });
 
-    // ---------- 工具函数 ----------
     function showToast(message, type = 'success') {
       statusToast.textContent = message;
       statusToast.className = 'status-toast show ' + type;
@@ -1125,21 +1109,17 @@
       const active = getActiveTab();
       if (active) {
         editor.innerHTML = active.content || '';
-        // 插入后立即规范化字体
         normalizeEditorFont();
       } else {
         editor.innerHTML = '';
       }
     }
 
-    // 规范化编辑器内所有文字的字体
     function normalizeEditorFont() {
-      // 递归遍历编辑器内所有元素，强制字体
       const all = editor.querySelectorAll('*');
       all.forEach(el => {
         el.style.fontFamily = FONT_STACK;
       });
-      // 编辑器本身也设置
       editor.style.fontFamily = FONT_STACK;
     }
 
@@ -1224,7 +1204,6 @@
       normalizeEditorFont();
     }
 
-    // ---------- 搜索功能 ----------
     function performSearch() {
       const keyword = searchInput.value.trim();
       syncEditorToActiveTab();
@@ -1438,7 +1417,6 @@
       renderTabs();
     }
 
-    // ---------- Gist 面板保存 ----------
     function saveGistCredentials() {
       localStorage.setItem(TOKEN_KEY, gistToken.value.trim());
       localStorage.setItem(GISTID_KEY, gistId.value.trim());
@@ -1459,7 +1437,6 @@
       showToast(autoSyncCheckbox.checked ? '已开启自动下载' : '已关闭自动下载', 'success');
     });
 
-    // ---------- 事件绑定 ----------
     editor.addEventListener('mouseup', saveSelection);
     editor.addEventListener('keyup', saveSelection);
     editor.addEventListener('blur', () => {
@@ -1624,7 +1601,6 @@
       reader.readAsText(file);
     });
 
-    // ---------- GitHub Gist 同步 ----------
     async function gistRequest(token, gistId, method = 'GET', body = null) {
       const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
       const headers = {
@@ -1789,7 +1765,6 @@
       }
     });
 
-    // ---------- 初始化 ----------
     async function init() {
       if (!loadFromLocal()) {
         initDefaultTab();
@@ -1815,7 +1790,6 @@
       updateColorPickerFromActiveTab();
       saveToLocal();
 
-      // 自动下载
       if (autoSyncCheckbox.checked && savedToken && savedGistId) {
         setTimeout(async () => {
           showToast('🔄 正在自动下载最新内容...', 'success');
