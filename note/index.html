@@ -157,13 +157,17 @@
       background: white;
       border-radius: 30px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      cursor: pointer;
+      cursor: grab;
       white-space: nowrap;
       border: 1px solid transparent;
       transition: 0.15s;
       font-size: 13px;
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
       flex-shrink: 0;
+      user-select: none;
+    }
+    .tab:active {
+      cursor: grabbing;
     }
     .tab.active {
       border-color: #2a6df4;
@@ -174,12 +178,23 @@
       background: #fffbe6;
       border-color: #f0c040;
     }
+    .tab.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+    .tab.drag-over-left {
+      border-left: 3px solid #2a6df4;
+    }
+    .tab.drag-over-right {
+      border-right: 3px solid #2a6df4;
+    }
     .tab-color-indicator {
       width: 11px;
       height: 11px;
       border-radius: 50%;
       background: #ddd;
       border: 1px solid rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
     }
     .tab-close {
       background: transparent;
@@ -217,7 +232,7 @@
       background: #c0cee2;
     }
 
-    /* 搜索栏 — z-index 提高到 30，确保下拉框在工具栏之上 */
+    /* 搜索栏 */
     .search-bar {
       display: flex;
       align-items: center;
@@ -276,7 +291,7 @@
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* 搜索结果下拉列表 — z-index 200，确保最上层 */
+    /* 搜索结果下拉列表 */
     .search-results {
       position: absolute;
       top: 100%;
@@ -342,7 +357,7 @@
       font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* 工具栏 — z-index 降低为 8，低于搜索栏 */
+    /* 工具栏 */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -553,7 +568,8 @@
       padding: 12px 14px;
       border: 1px solid #d9e1ec;
       border-radius: 14px;
-      font-size: 15px;
+      /* 默认字体大小 14px */
+      font-size: 14px;
       line-height: 1.6;
       background: #ffffff;
       outline: none;
@@ -690,7 +706,7 @@
       .editor {
         padding: 10px 12px;
         border-radius: 12px;
-        font-size: 15px;
+        font-size: 14px;
       }
 
       .search-bar {
@@ -799,8 +815,8 @@
         <select id="fontSizeSelect" title="字体大小">
           <option value="12px">12</option>
           <option value="13px">13</option>
-          <option value="14px">14</option>
-          <option value="15px" selected>15</option>
+          <option value="14px" selected>14</option>
+          <option value="15px">15</option>
           <option value="16px">16</option>
           <option value="18px">18</option>
           <option value="20px">20</option>
@@ -831,13 +847,16 @@
   (function() {
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v9';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v10';
     const TOKEN_KEY = 'lightweight_gist_token';
     const GISTID_KEY = 'lightweight_gist_id';
     const AUTO_SYNC_KEY = 'lightweight_auto_sync';
 
     let savedRange = null;
     let searchResultsList = [];
+
+    // 拖动状态
+    let draggedTabId = null;
 
     const tabsBar = document.getElementById('tabsBar');
     const editor = document.getElementById('editor');
@@ -871,7 +890,9 @@
     const searchResults = document.getElementById('searchResults');
 
     const FONT_STACK = '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif';
+    const DEFAULT_FONT_SIZE = '14px';
 
+    // ---------- 移动端折叠 ----------
     gistToggle.addEventListener('click', () => {
       const isOpen = gistPanel.classList.toggle('open');
       gistToggle.textContent = isOpen ? '☁️ 同步设置 ▴' : '☁️ 同步设置 ▾';
@@ -881,6 +902,7 @@
       toolbarToggle.textContent = isOpen ? '🎨 格式工具栏 ▴' : '🎨 格式工具栏 ▾';
     });
 
+    // ---------- 工具函数 ----------
     function showToast(message, type = 'success') {
       statusToast.textContent = message;
       statusToast.className = 'status-toast show ' + type;
@@ -963,7 +985,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 使用搜索框可在所有标签中查找关键字\n- 打开页面会自动下载最新内容（可在同步设置中关闭）'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 拖动标签可调整顺序\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 粘贴内容会自动统一为纯文本、雅黑、14px\n- 顶部支持 GitHub Gist 同步\n- 使用搜索框可在所有标签中查找关键字'
       }];
       activeTabId = defaultId;
     }
@@ -982,6 +1004,7 @@
       });
     }
 
+    // ---------- 标签渲染与拖动 ----------
     function renderTabs() {
       if (!tabs.length) {
         const newId = genId();
@@ -999,6 +1022,7 @@
         const tabEl = document.createElement('div');
         tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''} ${resultTabIds.has(tab.id) ? 'has-result' : ''}`;
         tabEl.dataset.id = tab.id;
+        tabEl.draggable = true; // 允许拖动
 
         const colorDot = document.createElement('span');
         colorDot.className = 'tab-color-indicator';
@@ -1046,6 +1070,75 @@
             updateColorPickerFromActiveTab();
             saveToLocal();
           }
+        });
+
+        // ===== 拖动事件 =====
+        tabEl.addEventListener('dragstart', (e) => {
+          draggedTabId = tab.id;
+          tabEl.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', tab.id);
+        });
+
+        tabEl.addEventListener('dragend', () => {
+          draggedTabId = null;
+          document.querySelectorAll('.tab').forEach(el => {
+            el.classList.remove('dragging', 'drag-over-left', 'drag-over-right');
+          });
+        });
+
+        tabEl.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (draggedTabId === tab.id) return;
+
+          // 清除其他元素的指示
+          document.querySelectorAll('.tab').forEach(el => {
+            el.classList.remove('drag-over-left', 'drag-over-right');
+          });
+
+          const rect = tabEl.getBoundingClientRect();
+          const midX = rect.left + rect.width / 2;
+          if (e.clientX < midX) {
+            tabEl.classList.add('drag-over-left');
+          } else {
+            tabEl.classList.add('drag-over-right');
+          }
+        });
+
+        tabEl.addEventListener('dragleave', () => {
+          tabEl.classList.remove('drag-over-left', 'drag-over-right');
+        });
+
+        tabEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (!draggedTabId || draggedTabId === tab.id) return;
+
+          const rect = tabEl.getBoundingClientRect();
+          const midX = rect.left + rect.width / 2;
+          const insertBefore = e.clientX < midX;
+
+          const fromIndex = tabs.findIndex(t => t.id === draggedTabId);
+          const toIndex = tabs.findIndex(t => t.id === tab.id);
+          if (fromIndex === -1 || toIndex === -1) return;
+
+          // 先把当前编辑内容同步
+          syncEditorToActiveTab();
+
+          const [moved] = tabs.splice(fromIndex, 1);
+          // 计算插入位置
+          let newIndex;
+          if (insertBefore) {
+            newIndex = tabs.findIndex(t => t.id === tab.id);
+          } else {
+            newIndex = tabs.findIndex(t => t.id === tab.id) + 1;
+          }
+          tabs.splice(newIndex, 0, moved);
+
+          saveToLocal();
+          renderTabs();
+          updateEditorFromActiveTab();
+          updateColorPickerFromActiveTab();
         });
 
         tabsBar.appendChild(tabEl);
@@ -1115,6 +1208,7 @@
       }
     }
 
+    // 规范化编辑器内所有文字的字体和默认字号
     function normalizeEditorFont() {
       const all = editor.querySelectorAll('*');
       all.forEach(el => {
@@ -1204,6 +1298,7 @@
       normalizeEditorFont();
     }
 
+    // ---------- 搜索功能 ----------
     function performSearch() {
       const keyword = searchInput.value.trim();
       syncEditorToActiveTab();
@@ -1417,6 +1512,7 @@
       renderTabs();
     }
 
+    // ---------- Gist 面板保存 ----------
     function saveGistCredentials() {
       localStorage.setItem(TOKEN_KEY, gistToken.value.trim());
       localStorage.setItem(GISTID_KEY, gistId.value.trim());
@@ -1437,6 +1533,49 @@
       showToast(autoSyncCheckbox.checked ? '已开启自动下载' : '已关闭自动下载', 'success');
     });
 
+    // ---------- 粘贴处理：强制纯文本 + 雅黑 + 14px ----------
+    editor.addEventListener('paste', (e) => {
+      e.preventDefault();
+      // 获取剪贴板纯文本
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      if (!text) return;
+
+      // 如果选区在编辑器内，先删除选中内容（实现替换粘贴）
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0 && editor.contains(selection.anchorNode)) {
+        selection.deleteFromDocument();
+      } else {
+        // 如果不在编辑器内，聚焦并把光标移到末尾
+        editor.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      // 用纯文本插入，带 span 统一字体和字号
+      const span = document.createElement('span');
+      span.style.fontFamily = FONT_STACK;
+      span.style.fontSize = DEFAULT_FONT_SIZE;
+      span.textContent = text;
+
+      const range = selection.getRangeAt(0);
+      range.insertNode(span);
+
+      // 光标移到插入内容之后
+      const newRange = document.createRange();
+      newRange.setStartAfter(span);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      syncEditorToActiveTab();
+      saveToLocal();
+      normalizeEditorFont();
+    });
+
+    // ---------- 事件绑定 ----------
     editor.addEventListener('mouseup', saveSelection);
     editor.addEventListener('keyup', saveSelection);
     editor.addEventListener('blur', () => {
@@ -1548,7 +1687,7 @@
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 9,
+        version: 10,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -1601,6 +1740,7 @@
       reader.readAsText(file);
     });
 
+    // ---------- GitHub Gist 同步 ----------
     async function gistRequest(token, gistId, method = 'GET', body = null) {
       const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
       const headers = {
@@ -1708,7 +1848,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 9,
+        version: 10,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -1765,6 +1905,7 @@
       }
     });
 
+    // ---------- 初始化 ----------
     async function init() {
       if (!loadFromLocal()) {
         initDefaultTab();
