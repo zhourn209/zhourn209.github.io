@@ -590,6 +590,46 @@
       box-shadow: 0 0 0 1px #f0c040;
     }
 
+    /* 粘贴选择菜单 */
+    .paste-menu {
+      position: fixed;
+      background: white;
+      border: 1px solid #b8c6db;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      z-index: 1000;
+      padding: 6px;
+      display: none;
+      min-width: 160px;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+    .paste-menu.open {
+      display: block;
+    }
+    .paste-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      text-align: left;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      transition: 0.1s;
+      color: #1e2e4a;
+    }
+    .paste-menu button:hover {
+      background: #eef4ff;
+    }
+    .paste-menu button.paste-plain {
+      color: #1b5e20;
+    }
+    .paste-menu button.paste-rich {
+      color: #2a6df4;
+    }
+
     /* 状态提示 */
     .status-toast {
       position: fixed;
@@ -836,13 +876,19 @@
   </div>
 </div>
 
+<!-- 粘贴选择菜单 -->
+<div class="paste-menu" id="pasteMenu">
+  <button class="paste-rich" data-mode="rich">📋 按格式粘贴</button>
+  <button class="paste-plain" data-mode="plain">📄 粘贴成纯文本</button>
+</div>
+
 <div id="statusToast" class="status-toast"></div>
 
 <script>
   (function() {
     let tabs = [];
     let activeTabId = null;
-    const STORAGE_KEY = 'lightweight_tabs_notes_v10';
+    const STORAGE_KEY = 'lightweight_tabs_notes_v11';
     const TOKEN_KEY = 'lightweight_gist_token';
     const GISTID_KEY = 'lightweight_gist_id';
     const AUTO_SYNC_KEY = 'lightweight_auto_sync';
@@ -851,6 +897,9 @@
     let searchResultsList = [];
 
     let draggedTabId = null;
+
+    // 粘贴相关：暂存剪贴板内容，等用户选择后再插入
+    let pendingPaste = null;
 
     const tabsBar = document.getElementById('tabsBar');
     const editor = document.getElementById('editor');
@@ -882,6 +931,7 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const searchCount = document.getElementById('searchCount');
     const searchResults = document.getElementById('searchResults');
+    const pasteMenu = document.getElementById('pasteMenu');
 
     const FONT_STACK = '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Helvetica Neue", Arial, sans-serif';
     const DEFAULT_FONT_SIZE = '14px';
@@ -977,7 +1027,7 @@
         id: defaultId,
         name: '笔记 1',
         color: '#f0f3f9',
-        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 拖动标签可调整顺序\n- 双击标签文字可重命名\n- 选中文字后使用加粗/颜色/字号按钮\n- 粘贴内容会自动统一为纯文本、雅黑、14px\n- 顶部支持 GitHub Gist 同步\n- 使用搜索框可在所有标签中查找关键字'
+        content: '欢迎使用轻量多标签笔记 ✨\n\n- 点击 + 新建标签\n- 拖动标签可调整顺序\n- 双击标签文字可重命名\n- 粘贴时可选择「按格式粘贴」或「粘贴成纯文本」\n- 选中文字后使用加粗/颜色/字号按钮\n- 顶部支持 GitHub Gist 同步\n- 使用搜索框可在所有标签中查找关键字'
       }];
       activeTabId = defaultId;
     }
@@ -1283,6 +1333,135 @@
       normalizeEditorFont();
     }
 
+    // ---------- 粘贴菜单 ----------
+    function showPasteMenu(x, y) {
+      // 限制位置，避免超出视口
+      const menuWidth = 180;
+      const menuHeight = 100;
+      const maxX = window.innerWidth - menuWidth - 10;
+      const maxY = window.innerHeight - menuHeight - 10;
+      pasteMenu.style.left = Math.max(10, Math.min(x, maxX)) + 'px';
+      pasteMenu.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+      pasteMenu.classList.add('open');
+    }
+
+    function hidePasteMenu() {
+      pasteMenu.classList.remove('open');
+    }
+
+    // 用暂存的剪贴板内容执行粘贴
+    function doPaste(mode) {
+      if (!pendingPaste) {
+        hidePasteMenu();
+        return;
+      }
+
+      // 同步当前编辑器内容
+      syncEditorToActiveTab();
+
+      // 恢复之前的选区
+      const selection = window.getSelection();
+      if (pendingPaste.savedRange) {
+        selection.removeAllRanges();
+        selection.addRange(pendingPaste.savedRange);
+      } else {
+        editor.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      // 删除选区内容（如果有）
+      if (selection.rangeCount > 0 && !selection.isCollapsed) {
+        selection.deleteFromDocument();
+      }
+
+      if (mode === 'plain') {
+        // 粘贴成纯文本：雅黑 + 14px
+        const span = document.createElement('span');
+        span.style.fontFamily = FONT_STACK;
+        span.style.fontSize = DEFAULT_FONT_SIZE;
+        span.textContent = pendingPaste.text;
+        const range = selection.getRangeAt(0);
+        range.insertNode(span);
+        // 光标移到插入内容之后
+        const newRange = document.createRange();
+        newRange.setStartAfter(span);
+        newRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        showToast('已粘贴为纯文本', 'success');
+      } else {
+        // 按格式粘贴：插入 HTML
+        const range = selection.getRangeAt(0);
+        const fragment = range.createContextualFragment(pendingPaste.html);
+        range.insertNode(fragment);
+        // 光标移到插入内容之后
+        const newRange = document.createRange();
+        newRange.setStartAfter(range.endContainer);
+        newRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        showToast('已按原格式粘贴', 'success');
+      }
+
+      // 清理并保存
+      pendingPaste = null;
+      hidePasteMenu();
+      normalizeEditorFont();
+      syncEditorToActiveTab();
+      saveToLocal();
+    }
+
+    // 点击菜单按钮
+    pasteMenu.addEventListener('mousedown', (e) => {
+      e.preventDefault(); // 防止失去焦点导致选区丢失
+    });
+    pasteMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const mode = btn.dataset.mode;
+      doPaste(mode);
+    });
+
+    // 点击其他区域隐藏菜单
+    document.addEventListener('mousedown', (e) => {
+      if (!e.target.closest('.paste-menu') && !e.target.closest('#editor')) {
+        hidePasteMenu();
+      }
+    });
+
+    // 监听编辑器的 paste 事件
+    editor.addEventListener('paste', (e) => {
+      e.preventDefault();
+
+      // 保存当前选区
+      const selection = window.getSelection();
+      let savedRangeForPaste = null;
+      if (selection.rangeCount > 0 && editor.contains(selection.anchorNode)) {
+        savedRangeForPaste = selection.getRangeAt(0).cloneRange();
+      }
+
+      // 获取剪贴板内容
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const text = clipboardData.getData('text/plain') || '';
+      const html = clipboardData.getData('text/html') || '';
+
+      pendingPaste = {
+        text: text,
+        html: html,
+        savedRange: savedRangeForPaste
+      };
+
+      // 显示粘贴菜单在鼠标位置
+      const x = e.clientX || (window.innerWidth / 2);
+      const y = e.clientY || (window.innerHeight / 2);
+      showPasteMenu(x, y);
+    });
+
+    // ---------- 搜索功能 ----------
     function performSearch() {
       const keyword = searchInput.value.trim();
       syncEditorToActiveTab();
@@ -1516,43 +1695,6 @@
       showToast(autoSyncCheckbox.checked ? '已开启自动下载' : '已关闭自动下载', 'success');
     });
 
-    // 粘贴处理：强制纯文本 + 雅黑 + 14px
-    editor.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-      if (!text) return;
-
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0 && editor.contains(selection.anchorNode)) {
-        selection.deleteFromDocument();
-      } else {
-        editor.focus();
-        const range = document.createRange();
-        range.selectNodeContents(editor);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-
-      const span = document.createElement('span');
-      span.style.fontFamily = FONT_STACK;
-      span.style.fontSize = DEFAULT_FONT_SIZE;
-      span.textContent = text;
-
-      const range = selection.getRangeAt(0);
-      range.insertNode(span);
-
-      const newRange = document.createRange();
-      newRange.setStartAfter(span);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-
-      syncEditorToActiveTab();
-      saveToLocal();
-      normalizeEditorFont();
-    });
-
     editor.addEventListener('mouseup', saveSelection);
     editor.addEventListener('keyup', saveSelection);
     editor.addEventListener('blur', () => {
@@ -1664,7 +1806,7 @@
     exportJsonBtn.addEventListener('click', () => {
       syncEditorToActiveTab();
       const data = {
-        version: 10,
+        version: 11,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
       const jsonStr = JSON.stringify(data, null, 2);
@@ -1824,7 +1966,7 @@
       syncEditorToActiveTab();
 
       const data = {
-        version: 10,
+        version: 11,
         tabs: tabs.map(t => ({ id: t.id, name: t.name, color: t.color, content: t.content }))
       };
 
@@ -1878,6 +2020,9 @@
         e.preventDefault();
         searchInput.focus();
         searchInput.select();
+      }
+      if (e.key === 'Escape') {
+        hidePasteMenu();
       }
     });
 
