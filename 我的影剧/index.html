@@ -101,7 +101,7 @@
             display: none;
         }
 
-        /* 计数置顶区域 - 新增 */
+        /* 计数置顶区域 */
         .counter-section {
             display: flex;
             flex-wrap: wrap;
@@ -127,6 +127,79 @@
             font-weight: 700;
             font-size: 16px;
             color: #1e293b;
+        }
+
+        /* 搜索框 */
+        .search-panel {
+            background: white;
+            border-radius: 40px;
+            padding: 4px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .search-panel .search-icon {
+            font-size: 18px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        .search-panel input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px 0;
+            font-size: 16px;
+            background: transparent;
+            color: #1e293b;
+        }
+        .search-panel input::placeholder {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .search-panel .clear-btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .search-panel .clear-btn.show {
+            display: flex;
+        }
+        .search-panel .clear-btn:active {
+            background: #cbd5e1;
+        }
+        /* 搜索结果信息 */
+        .search-info {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 12px;
+            padding: 0 8px;
+            display: none;
+        }
+        .search-info.show {
+            display: block;
+        }
+        .search-info .highlight {
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+        /* 高亮匹配文字 */
+        mark.search-highlight {
+            background: #fde68a;
+            color: #92400e;
+            border-radius: 4px;
+            padding: 0 2px;
         }
 
         /* 添加面板 */
@@ -686,7 +759,7 @@
         </div>
     </div>
 
-    <!-- 计数置顶区域 - 新增 -->
+    <!-- 计数置顶区域 -->
     <div class="counter-section">
         <div class="counter-item">
             <span>进行中</span>
@@ -713,6 +786,14 @@
             <span class="counter-value" id="counterMovie">0</span>
         </div>
     </div>
+
+    <!-- 搜索框 -->
+    <div class="search-panel">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索剧名...">
+        <button class="clear-btn" id="clearSearchBtn" title="清空搜索">✕</button>
+    </div>
+    <div class="search-info" id="searchInfo"></div>
 
     <!-- GitHub 同步面板 -->
     <div class="sync-panel" id="syncPanel">
@@ -807,7 +888,7 @@
     </div>
 
     <div class="footer-note">
-        ✨ 双击文字编辑 · 进行中条目➡️移入欧美剧 · 中文按拼音排序 · 支持 GitHub Gist 云端同步
+        ✨ 双击文字编辑 · 进行中条目➡️移入欧美剧 · 中文按拼音排序 · 支持 GitHub Gist 云端同步 · 支持搜索
     </div>
 </div>
 
@@ -834,6 +915,7 @@
         let watchingTitles = [];
         let completed = { usuk: [], asia: [], movie: [] };
         let plannedTitles = [];
+        let currentSearchQuery = '';
         
         // GitHub 同步状态
         let syncState = {
@@ -1300,6 +1382,47 @@
             }
         }
 
+        // ========== 搜索功能 ========== 
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // 高亮匹配（大小写不敏感）
+        function highlightMatch(text, query) {
+            if (!query) return escapeHtml(text);
+            const escapedText = escapeHtml(text);
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedQuery})`, 'gi');
+            return escapedText.replace(regex, '<mark class="search-highlight">$1</mark>');
+        }
+
+        function filterTitles(titlesArray, query) {
+            if (!query) return titlesArray;
+            const lowerQuery = query.toLowerCase();
+            return titlesArray.filter(t => t.toLowerCase().includes(lowerQuery));
+        }
+
+        function updateSearchInfo(count, query) {
+            const infoEl = document.getElementById('searchInfo');
+            if (query && count > 0) {
+                infoEl.innerHTML = `🔍 找到 <span class="highlight">${count}</span> 个匹配 "<span class="highlight">${escapeHtml(query)}</span>" 的结果`;
+                infoEl.classList.add('show');
+            } else if (query && count === 0) {
+                infoEl.innerHTML = `😕 没有找到匹配 "<span class="highlight">${escapeHtml(query)}</span>" 的结果`;
+                infoEl.classList.add('show');
+            } else {
+                infoEl.classList.remove('show');
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.remove('show');
+            currentSearchQuery = '';
+            document.getElementById('searchInfo').classList.remove('show');
+            renderAll();
+        }
+
         // ========== 原有功能 ========== 
         
         function toggleSubcategorySelect() {
@@ -1319,13 +1442,21 @@
             completed.movie.sort(compareTitles);
             plannedTitles.sort(compareTitles);
 
-            renderList('listWatching', watchingTitles, 'watching');
-            renderList('listUsuk', completed.usuk, 'completed', 'usuk');
-            renderList('listAsia', completed.asia, 'completed', 'asia');
-            renderList('listMovie', completed.movie, 'completed', 'movie');
-            renderList('listPlanned', plannedTitles, 'planned');
+            const q = currentSearchQuery;
 
-            // 更新顶部计数
+            const filteredWatching = filterTitles(watchingTitles, q);
+            const filteredUsuk = filterTitles(completed.usuk, q);
+            const filteredAsia = filterTitles(completed.asia, q);
+            const filteredMovie = filterTitles(completed.movie, q);
+            const filteredPlanned = filterTitles(plannedTitles, q);
+
+            renderList('listWatching', filteredWatching, 'watching', '', q);
+            renderList('listUsuk', filteredUsuk, 'completed', 'usuk', q);
+            renderList('listAsia', filteredAsia, 'completed', 'asia', q);
+            renderList('listMovie', filteredMovie, 'completed', 'movie', q);
+            renderList('listPlanned', filteredPlanned, 'planned', '', q);
+
+            // 更新顶部计数（使用全部数据的总数，不受搜索影响）
             const totalWatching = watchingTitles.length;
             const totalCompleted = completed.usuk.length + completed.asia.length + completed.movie.length;
             const totalPlanned = plannedTitles.length;
@@ -1344,20 +1475,30 @@
             document.getElementById('countUsuk').innerText = completed.usuk.length;
             document.getElementById('countAsia').innerText = completed.asia.length;
             document.getElementById('countMovie').innerText = completed.movie.length;
+
+            // 搜索信息
+            if (q) {
+                const totalMatches = filteredWatching.length + filteredUsuk.length + filteredAsia.length + filteredMovie.length + filteredPlanned.length;
+                updateSearchInfo(totalMatches, q);
+            } else {
+                document.getElementById('searchInfo').classList.remove('show');
+            }
         }
 
-        function renderList(listId, titlesArray, type, subType = '') {
+        function renderList(listId, titlesArray, type, subType = '', searchQuery = '') {
             const ul = document.getElementById(listId);
             if (!ul) return;
 
             if (titlesArray.length === 0) {
-                ul.innerHTML = `<li class="empty-message">✨ 暂无</li>`;
+                const msg = searchQuery ? '🔍 无匹配结果' : '✨ 暂无';
+                ul.innerHTML = `<li class="empty-message">${msg}</li>`;
                 return;
             }
 
             let html = '';
             titlesArray.forEach(title => {
                 const safeTitle = title.replace(/"/g, '&quot;');
+                const displayTitle = searchQuery ? highlightMatch(title, searchQuery) : escapeHtml(title);
                 let buttons = '';
                 if (type === 'watching') {
                     buttons = `<div class="item-actions">
@@ -1373,7 +1514,7 @@
                 }
 
                 html += `<li class="movie-item">
-                    <span class="movie-title" contenteditable="true" data-type="${type}" data-sub="${subType}" data-oldtitle="${safeTitle}">${title}</span>
+                    <span class="movie-title" contenteditable="true" data-type="${type}" data-sub="${subType}" data-oldtitle="${safeTitle}">${displayTitle}</span>
                     ${buttons}
                 </li>`;
             });
@@ -1404,13 +1545,14 @@
 
         function handleTitleBlur(e) {
             const span = e.currentTarget;
+            // 获取纯文本内容（去掉高亮标记）
             const newText = span.innerText.trim();
             const oldTitle = span.dataset.oldtitle;
             const type = span.dataset.type;
             const sub = span.dataset.sub;
 
             if (!newText || newText === oldTitle) {
-                span.innerText = oldTitle;
+                renderAll();
                 return;
             }
 
@@ -1422,16 +1564,9 @@
                 const idx = arr.findIndex(t => t === oldTitle);
                 if (idx !== -1) {
                     arr[idx] = newText;
-                    span.dataset.oldtitle = newText;
-                    const li = span.closest('li');
-                    if (li) {
-                        li.querySelectorAll('[data-title]').forEach(btn => {
-                            btn.dataset.title = newText;
-                        });
-                    }
                     renderAll();
                 } else {
-                    span.innerText = oldTitle;
+                    renderAll();
                 }
             }
         }
@@ -1543,6 +1678,27 @@
         document.getElementById('syncDownBtn').onclick = () => syncDown(false);
         document.getElementById('autoSyncBtn').onclick = toggleAutoSync;
         document.getElementById('disconnectBtn').onclick = disconnect;
+
+        // 搜索事件绑定
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        let searchDebounceTimer = null;
+        searchInput.addEventListener('input', () => {
+            const val = searchInput.value.trim();
+            clearSearchBtn.classList.toggle('show', val.length > 0);
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                currentSearchQuery = val;
+                renderAll();
+            }, 150);
+        });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                clearSearch();
+                searchInput.blur();
+            }
+        });
+        clearSearchBtn.onclick = clearSearch;
 
         function initializeData() {
             watchingTitles = [
