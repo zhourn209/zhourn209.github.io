@@ -1,108 +1,912 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>日历记录</title>
-<style>
-*{box-sizing:border-box;font-family:system-ui}
-.wrap{max-width:800px;margin:20px auto;padding:16px}
-.top-bar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
-.mark-btn{width:32px;height:32px;background:#ff3333;border:2px solid #999;border-radius:4px;cursor:pointer}
-.mark-tip{color:#444}
-.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:16px 0}
-.day{padding:10px;text-align:center;border:1px solid #ddd;border-radius:6px;cursor:pointer}
-.day.marked{background:#ffcccc}
-.day.active{outline:2px solid #2288ff}
-.record-list{margin-top:20px}
-.record-item{display:grid;grid-template-columns:80px 1fr;padding:8px;border-bottom:1px solid #eee}
-.time-col{color:#333}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>智能血压记录仪 - 网格版</title>
+    <style>
+        * {
+            font-family: 'Trebuchet MS', '微软雅黑', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        /* 顶部工具栏 */
+        .toolbar {
+            background: white;
+            border-radius: 24px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gist-config {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 40px;
+        }
+        .gist-config input {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            font-size: 14px;
+            width: 180px;
+            font-family: inherit;
+        }
+        button {
+            background: #1e293b;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        button.primary { background: #0f3b5c; }
+        button.success { background: #2c6e2f; }
+        button.warning { background: #b45309; }
+        button.danger { background: #9b2c2c; }
+        button:active { transform: scale(0.96); }
+        .stats {
+            background: #e6f0fa;
+            padding: 6px 16px;
+            border-radius: 32px;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .main-panel { display: flex; flex-direction: column; gap: 20px; }
+        
+        /* 参考标准栏 */
+        .standard-bar {
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef9e3 100%);
+            border-radius: 24px;
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .standard-item {
+            background: rgba(255,255,240,0.8);
+            padding: 6px 14px;
+            border-radius: 40px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            font-family: inherit;
+        }
+        .standard-item strong {
+            color: #1e3a5f;
+        }
+        
+        /* 标签页区域 - 网格布局，右侧滚动条 */
+        .tabs-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 28px;
+            padding: 12px 16px 12px 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-height: 280px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #e2e8f0;
+        }
+        .tabs-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        .tabs-wrapper::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        .tabs-wrapper::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        .tabs-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .tabs-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            align-content: start;
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 6px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            white-space: nowrap;
+            min-width: 0;
+            gap: 2px;
+        }
+        .tab-btn.active {
+            background: #0f3b5c;
+            color: white;
+        }
+        .tab-btn .tab-date {
+            font-size: 11px;
+            font-weight: 500;
+            flex: 1;
+            text-align: center;
+        }
+        .tab-btn .tab-count {
+            font-size: 9px;
+            opacity: 0.7;
+            background: rgba(0,0,0,0.08);
+            padding: 0 6px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .tab-btn.active .tab-count {
+            background: rgba(255,255,255,0.2);
+        }
+        .delete-tab-btn {
+            background: none;
+            color: #dc2626;
+            font-size: 12px;
+            padding: 0 2px;
+            cursor: pointer;
+            line-height: 1;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+        .tab-btn.active .delete-tab-btn {
+            color: #fca5a5;
+            opacity: 0.8;
+        }
+        .delete-tab-btn:hover {
+            opacity: 1 !important;
+        }
+        .tab-btn:hover {
+            background: #cbd5e1;
+        }
+        .tab-btn.active:hover {
+            background: #1e4a6b;
+        }
+        .no-tabs-msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+        .tabs-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 6px 4px 0 0;
+            font-size: 11px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 8px;
+        }
+        .record-card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+        .add-form input, .add-form textarea {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .add-form input { width: 110px; }
+        .add-form textarea { width: 180px; resize: vertical; }
+        .records-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+        .record-item {
+            background: #f9fafb;
+            border-radius: 24px;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-left: 6px solid #3b82f6;
+        }
+        .record-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            flex: 2;
+        }
+        .record-field {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+        .record-field input, .record-field textarea {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            padding: 4px 0;
+            width: auto;
+            outline: none;
+            font-family: inherit;
+        }
+        .record-field input:focus, .record-field textarea:focus {
+            border-bottom: 1px dashed #3b82f6;
+        }
+        .remark-edit { min-width: 120px; }
+        .delete-record {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .status-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 1000;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .export-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .gist-download-btn { background: #2c6e2f; }
+
+        @media (max-width: 1200px) {
+            .tabs-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+        @media (max-width: 900px) {
+            .tabs-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .tabs-grid { grid-template-columns: repeat(3, 1fr); }
+            .add-form input, .add-form textarea { width: 100%; }
+            .record-details { flex-direction: column; align-items: flex-start; }
+            .standard-bar { flex-direction: column; gap: 8px; }
+            .tabs-wrapper { max-height: 200px; padding: 8px; }
+            .tab-btn { font-size: 11px; padding: 4px 6px; }
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top-bar">
-    <div class="mark-btn" id="markToggle"></div>
-    <span class="mark-tip">标记模式：<span id="markStatus">关闭</span>（开启后点击日期会上色）</span>
-  </div>
-  <div class="calendar" id="calendarBox"></div>
-  <h3>当日记录</h3>
-  <div id="recordList" class="record-list"></div>
+<div class="container">
+    <!-- 第一行工具栏 -->
+    <div class="toolbar">
+        <div class="gist-config">
+            <input type="text" id="tokenInput" placeholder="GitHub Token" style="width:180px">
+            <input type="text" id="gistIdInput" placeholder="Gist ID" style="width:150px">
+            <button id="testConnBtn">🔌 测试</button>
+            <button id="saveGistBtn" class="primary">💾 保存</button>
+            <button id="downloadGistBtn" class="gist-download-btn">⬇️ 下载</button>
+        </div>
+        <div class="export-group">
+            <button id="exportCsvBtn" class="warning">📎 CSV</button>
+            <button id="exportJsonBtn" class="warning">📄 JSON</button>
+            <button id="uploadDataBtn">⬆️ 导入</button>
+            <input type="file" id="importFileInput" accept=".json,.csv" style="display:none">
+        </div>
+        <div class="stats" id="statsPanel">📊 总:0 | 今日:0</div>
+    </div>
+
+    <!-- 第二行：统一的参考标准栏 -->
+    <div class="standard-bar" id="standardBar">
+        <div class="standard-item"><strong>🩺 血压</strong> 正常 &lt;120/80 | 1级 130-139/80-89 | 2级 ≥140/90</div>
+        <div class="standard-item"><strong>❤️ 心率</strong> 60-100 bpm | 56岁↑男 60-90</div>
+        <div class="standard-item"><strong>📉 脉压差</strong> 正常 30-50 | &lt;30偏低 | &gt;50偏高</div>
+        <div class="standard-item"><strong>🔄 双臂差</strong> 收缩压差 &gt;10 mmHg 需注意</div>
+    </div>
+
+    <div class="main-panel">
+        <!-- 标签页：网格布局，右侧滚动条 -->
+        <div class="tabs-wrapper" id="tabsWrapper">
+            <div class="tabs-grid" id="tabsContainer">
+                <!-- 由JS动态渲染 -->
+            </div>
+            <div class="tabs-footer" id="tabsFooter">
+                <span id="tabInfo">共 0 个日期</span>
+            </div>
+        </div>
+        <div class="record-card">
+            <div class="add-form">
+                <input type="number" id="sysInput" placeholder="收缩压" step="1" value="120">
+                <span>/</span>
+                <input type="number" id="diaInput" placeholder="舒张压" step="1" value="80">
+                <input type="number" id="hrInput" placeholder="心率" step="1" value="72">
+                <textarea id="remarkInput" placeholder="备注" rows="1" style="width:150px"></textarea>
+                <button id="addRecordBtn" class="success">➕ 添加记录</button>
+            </div>
+            <div class="records-list" id="recordsList"></div>
+        </div>
+    </div>
 </div>
+<div id="statusMsg" class="status-toast" style="display:none"></div>
 
 <script>
-// 数据
-let markedDays = new Set(); // 被标记的日期 '2026-11-02'
-let currentViewDate = null;
-let isMarkMode = false; // 是否开启标记模式，默认关闭，不自动上色
+    // ---------- 数据模型 ----------
+    let masterData = {};
+    let activeDate = null;
+    let gistToken = "", gistId = "";
+    let autoSaveTimer = null;
+    const AUTO_SAVE_DELAY = 30000;
 
-// 示例记录，结构：{date, time, content}
-let records = [
-  {date:"2026-11-02", time:"08:30", content:"测试记录1"},
-  {date:"2026-11-02", time:"14:00", content:"测试记录2"},
-  {date:"2026-11-01", time:"09:10", content:"昨天记录"}
-];
+    // DOM 元素
+    const tokenInput = document.getElementById('tokenInput');
+    const gistIdInput = document.getElementById('gistIdInput');
+    const testConnBtn = document.getElementById('testConnBtn');
+    const saveGistBtn = document.getElementById('saveGistBtn');
+    const downloadGistBtn = document.getElementById('downloadGistBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const uploadDataBtn = document.getElementById('uploadDataBtn');
+    const importFileInput = document.getElementById('importFileInput');
+    const statsPanel = document.getElementById('statsPanel');
+    const tabsContainer = document.getElementById('tabsContainer');
+    const tabsWrapper = document.getElementById('tabsWrapper');
+    const tabInfo = document.getElementById('tabInfo');
+    const recordsListDiv = document.getElementById('recordsList');
+    const addRecordBtn = document.getElementById('addRecordBtn');
+    const sysInput = document.getElementById('sysInput');
+    const diaInput = document.getElementById('diaInput');
+    const hrInput = document.getElementById('hrInput');
+    const remarkInput = document.getElementById('remarkInput');
+    const statusMsgDiv = document.getElementById('statusMsg');
 
-const markToggle = document.getElementById('markToggle');
-const markStatus = document.getElementById('markStatus');
-const calendarBox = document.getElementById('calendarBox');
-const recordList = document.getElementById('recordList');
-
-// 切换标记模式
-markToggle.onclick = ()=>{
-  isMarkMode = !isMarkMode;
-  markStatus.innerText = isMarkMode ? '开启' : '关闭';
-};
-
-// 渲染日历（简化当月）
-function renderCalendar() {
-  calendarBox.innerHTML = '';
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  const firstDay = new Date(y,m,1);
-  const lastDay = new Date(y,m+1,0);
-  for(let d=1;d<=lastDay.getDate();d++){
-    const dayEl = document.createElement('div');
-    dayEl.className = 'day';
-    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    dayEl.innerText = d;
-    if(markedDays.has(dateStr)) dayEl.classList.add('marked');
-    if(currentViewDate === dateStr) dayEl.classList.add('active');
-
-    dayEl.onclick = ()=>{
-      if(isMarkMode){
-        // 标记模式：给日期上色
-        if(markedDays.has(dateStr)) markedDays.delete(dateStr);
-        else markedDays.add(dateStr);
-      }else{
-        // 正常模式：点击日期 → 切换查看当日记录
-        currentViewDate = dateStr;
-        renderRecords();
-      }
-      renderCalendar();
+    // 辅助函数
+    function showStatus(msg, isError = false) {
+        statusMsgDiv.textContent = msg;
+        statusMsgDiv.style.display = "block";
+        statusMsgDiv.style.background = isError ? "#b91c1c" : "#1e293b";
+        setTimeout(() => { statusMsgDiv.style.display = "none"; }, 2800);
     }
-    calendarBox.appendChild(dayEl);
-  }
-}
 
-// 渲染记录，修复时间栏变成0的问题
-function renderRecords(){
-  recordList.innerHTML = '';
-  if(!currentViewDate) return;
-  const dayRecords = records.filter(r=>r.date === currentViewDate);
-  if(dayRecords.length === 0){
-    recordList.innerHTML = '<p>该日期暂无记录</p>';
-    return;
-  }
-  dayRecords.forEach(r=>{
-    const div = document.createElement('div');
-    div.className = 'record-item';
-    div.innerHTML = `<div class="time-col">${r.time}</div><div>${r.content}</div>`;
-    recordList.appendChild(div);
-  })
-}
+    async function withProgress(actionName, callback) {
+        showStatus(`⏳ ${actionName} 进行中...`);
+        try {
+            const result = await callback();
+            showStatus(`✅ ${actionName} 已完成`);
+            return result;
+        } catch (err) {
+            console.error(err);
+            showStatus(`❌ ${actionName} 失败: ${err.message || err}`, true);
+            throw err;
+        }
+    }
 
-renderCalendar();
+    function markDataChanged() {
+        resetAutoUploadTimer();
+    }
+
+    function resetAutoUploadTimer() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        const token = gistToken || tokenInput.value.trim();
+        if (token && token.length > 0) {
+            autoSaveTimer = setTimeout(() => {
+                const currentToken = gistToken || tokenInput.value.trim();
+                if (currentToken) {
+                    withProgress("自动上传Gist", () => uploadToGistCore(false)).catch(e => console.warn("自动上传失败:", e));
+                }
+            }, AUTO_SAVE_DELAY);
+        }
+    }
+
+    function calcPulsePressure(sys, dia) { let pp = sys - dia; return pp >= 0 ? pp : 0; }
+    function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`; }
+    function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 8); }
+
+    function normalizeTime(timeStr) {
+        if (!timeStr) return "00:00:00";
+        let parts = timeStr.split(' ');
+        if (parts.length < 2) return "00:00:00";
+        let timePart = parts[1];
+        if (timePart.includes(':')) {
+            let t = timePart.split(':');
+            let hour = t[0].padStart(2,'0');
+            let minute = t[1].padStart(2,'0');
+            let second = t[2] ? t[2].padStart(2,'0') : "00";
+            return `${hour}:${minute}:${second}`;
+        }
+        return "00:00:00";
+    }
+
+    function convertLegacyRecord(rec, dateKey) {
+        let sys = null, dia = null, hr = null;
+        if (rec.bp && typeof rec.bp === 'string') {
+            let bpStr = rec.bp.trim();
+            let match = bpStr.match(/(\d+)\/(\d+)/);
+            if (match) {
+                sys = parseInt(match[1]);
+                dia = parseInt(match[2]);
+            } else {
+                let nums = bpStr.split('/');
+                if (nums.length >= 2) {
+                    sys = parseInt(nums[0]);
+                    dia = parseInt(nums[1]);
+                }
+            }
+            if (rec.bp.includes('/') && rec.bp.split('/').length === 3 && (!rec.hr || rec.hr === "")) {
+                let parts = rec.bp.split('/');
+                if (parts.length === 3) {
+                    let maybeHr = parseInt(parts[2]);
+                    if (!isNaN(maybeHr) && maybeHr > 30 && maybeHr < 200) hr = maybeHr;
+                }
+            }
+        }
+        if (rec.sys !== undefined && !isNaN(parseInt(rec.sys))) sys = parseInt(rec.sys);
+        if (rec.dia !== undefined && !isNaN(parseInt(rec.dia))) dia = parseInt(rec.dia);
+        if (rec.hr !== undefined && rec.hr !== "") hr = parseInt(rec.hr);
+        if ((hr === null || isNaN(hr)) && rec.note) {
+            let noteHr = rec.note.match(/心率[：:]?\s*(\d+)/);
+            if (!noteHr) noteHr = rec.note.match(/(\d{2,3})\s*bpm/i);
+            if (noteHr && noteHr[1]) hr = parseInt(noteHr[1]);
+        }
+        if (hr === null || isNaN(hr)) hr = 0;
+        let rawTime = rec.time || rec.timestamp || "";
+        let timeStr = normalizeTime(rawTime);
+        let remark = rec.note || rec.remark || "";
+        if (sys && dia && sys > 0 && dia > 0 && hr > 0) {
+            return {
+                id: generateId(),
+                time: timeStr,
+                sys: sys,
+                dia: dia,
+                hr: hr,
+                pulsePressure: calcPulsePressure(sys, dia),
+                remark: remark || ""
+            };
+        }
+        return null;
+    }
+
+    function importAndFixJson(jsonObj) {
+        let newMaster = {};
+        for (let dateKey in jsonObj) {
+            let records = jsonObj[dateKey];
+            if (!Array.isArray(records)) continue;
+            let fixedRecords = [];
+            for (let rec of records) {
+                let standardRec = null;
+                if (rec.sys !== undefined && rec.dia !== undefined && rec.hr !== undefined && !isNaN(rec.sys) && !isNaN(rec.dia) && !isNaN(rec.hr) && rec.sys>0 && rec.dia>0 && rec.hr>0) {
+                    standardRec = {
+                        id: rec.id || generateId(),
+                        time: rec.time ? normalizeTime(rec.time) : "00:00:00",
+                        sys: parseInt(rec.sys),
+                        dia: parseInt(rec.dia),
+                        hr: parseInt(rec.hr),
+                        pulsePressure: calcPulsePressure(parseInt(rec.sys), parseInt(rec.dia)),
+                        remark: rec.remark || rec.note || ""
+                    };
+                } else {
+                    standardRec = convertLegacyRecord(rec, dateKey);
+                }
+                if (standardRec && standardRec.sys > 0 && standardRec.dia > 0 && standardRec.hr > 0) {
+                    fixedRecords.push(standardRec);
+                }
+            }
+            if (fixedRecords.length > 0) {
+                fixedRecords.sort((a,b)=> a.time.localeCompare(b.time));
+                newMaster[dateKey] = fixedRecords;
+            }
+        }
+        return newMaster;
+    }
+
+    // 添加记录
+    function addRecordToCurrentTab() {
+        if (!activeDate) {
+            const todayStr = getTodayStr();
+            if (!masterData[todayStr]) masterData[todayStr] = [];
+            activeDate = todayStr;
+            renderTabs();
+        }
+        const sys = parseInt(sysInput.value);
+        const dia = parseInt(diaInput.value);
+        const hr = parseInt(hrInput.value);
+        const remark = remarkInput.value.trim();
+        if (isNaN(sys) || isNaN(dia) || isNaN(hr) || sys <= 0 || dia <= 0 || hr <= 0) {
+            showStatus("请正确填写血压/心率(正数)", true);
+            return;
+        }
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        const newRecord = {
+            id: generateId(),
+            time: timeStr,
+            sys, dia, hr,
+            pulsePressure: calcPulsePressure(sys, dia),
+            remark: remark
+        };
+        if (!masterData[activeDate]) masterData[activeDate] = [];
+        masterData[activeDate].push(newRecord);
+        masterData[activeDate].sort((a,b)=> a.time.localeCompare(b.time));
+        renderCurrentTabRecords();
+        updateStats();
+        remarkInput.value = "";
+        sysInput.value = "120";
+        diaInput.value = "80";
+        hrInput.value = "72";
+        markDataChanged();
+        showStatus("记录已添加");
+    }
+
+    function updateRecord(dateKey, recordId, field, newValue) {
+        const records = masterData[dateKey];
+        if (!records) return;
+        const idx = records.findIndex(r => r.id === recordId);
+        if (idx === -1) return;
+        let updated = { ...records[idx] };
+        if (field === 'sys') { updated.sys = parseInt(newValue); if (isNaN(updated.sys)) return; updated.pulsePressure = calcPulsePressure(updated.sys, updated.dia); }
+        else if (field === 'dia') { updated.dia = parseInt(newValue); if (isNaN(updated.dia)) return; updated.pulsePressure = calcPulsePressure(updated.sys, updated.dia); }
+        else if (field === 'hr') { updated.hr = parseInt(newValue); if (isNaN(updated.hr)) return; }
+        else if (field === 'remark') updated.remark = newValue;
+        else if (field === 'time') updated.time = newValue;
+        if (updated.sys <= 0 || updated.dia <= 0 || updated.hr <= 0) { showStatus("数值必须>0", true); return; }
+        records[idx] = updated;
+        renderCurrentTabRecords();
+        updateStats();
+        markDataChanged();
+        showStatus("已更新");
+    }
+
+    function deleteRecord(dateKey, recordId) {
+        if (masterData[dateKey]) {
+            masterData[dateKey] = masterData[dateKey].filter(r => r.id !== recordId);
+            if (masterData[dateKey].length === 0) {
+                delete masterData[dateKey];
+                const dates = Object.keys(masterData).sort().reverse();
+                activeDate = dates.length ? dates[0] : null;
+                renderTabs();
+            } else {
+                renderCurrentTabRecords();
+            }
+            updateStats();
+            markDataChanged();
+            showStatus("已删除记录");
+        }
+    }
+
+    function deleteTab(dateKey) {
+        if (masterData[dateKey]) {
+            delete masterData[dateKey];
+            const dates = Object.keys(masterData).sort().reverse();
+            activeDate = dates.length ? dates[0] : null;
+            renderTabs();
+            updateStats();
+            markDataChanged();
+            showStatus(`已删除 ${dateKey}`);
+        }
+    }
+
+    function ensureTodayTabExists() {
+        const today = getTodayStr();
+        if (!masterData[today]) { masterData[today] = []; }
+        if (!activeDate || !masterData[activeDate]) activeDate = today;
+        renderTabs();
+    }
+
+    // 核心：渲染网格标签页
+    function renderTabs() {
+        const dates = Object.keys(masterData).sort();
+        tabsContainer.innerHTML = '';
+        if (dates.length === 0) {
+            const today = getTodayStr();
+            masterData[today] = [];
+            activeDate = today;
+            dates.push(today);
+        }
+        // 为每个日期创建标签
+        dates.forEach(date => {
+            const tabDiv = document.createElement('div');
+            tabDiv.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
+            tabDiv.dataset.date = date;
+            const count = masterData[date] ? masterData[date].length : 0;
+            tabDiv.innerHTML = `
+                <span class="tab-date">${date}</span>
+                <span class="tab-count">${count}</span>
+                <span class="delete-tab-btn" data-date="${date}">✕</span>
+            `;
+            tabDiv.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-tab-btn')) {
+                    e.stopPropagation();
+                    deleteTab(date);
+                } else {
+                    activeDate = date;
+                    renderTabs();
+                    renderCurrentTabRecords();
+                }
+            });
+            tabsContainer.appendChild(tabDiv);
+        });
+
+        // 更新底部信息
+        tabInfo.textContent = `共 ${dates.length} 个日期`;
+
+        // 自动滚动到激活的标签位置（确保可见）
+        const activeTab = tabsContainer.querySelector('.tab-btn.active');
+        if (activeTab) {
+            setTimeout(() => {
+                activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }, 50);
+        }
+
+        renderCurrentTabRecords();
+        updateStats();
+    }
+
+    function renderCurrentTabRecords() {
+        if (!activeDate || !masterData[activeDate] || masterData[activeDate].length === 0) {
+            recordsListDiv.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;">暂无记录，请添加记录</div>';
+            return;
+        }
+        const records = masterData[activeDate];
+        recordsListDiv.innerHTML = '';
+        records.forEach(rec => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'record-item';
+            itemDiv.innerHTML = `
+                <div class="record-details">
+                    <div class="record-field">🕒 <input type="text" value="${escapeHtml(rec.time)}" data-field="time" data-id="${rec.id}" class="editable-field" style="width:80px;"></div>
+                    <div class="record-field">❤️ <input type="number" value="${rec.sys}" data-field="sys" data-id="${rec.id}" class="editable-field" style="width:60px;"> / <input type="number" value="${rec.dia}" data-field="dia" data-id="${rec.id}" class="editable-field" style="width:60px;"> mmHg</div>
+                    <div class="record-field">💓 <input type="number" value="${rec.hr}" data-field="hr" data-id="${rec.id}" class="editable-field" style="width:60px;"> bpm</div>
+                    <div class="record-field">📊 脉压差 ${rec.pulsePressure} mmHg</div>
+                    <div class="record-field">📝 <textarea rows="1" data-field="remark" data-id="${rec.id}" class="editable-field remark-edit" style="width:140px;">${escapeHtml(rec.remark)}</textarea></div>
+                </div>
+                <button class="delete-record" data-id="${rec.id}">删除</button>
+            `;
+            const inputs = itemDiv.querySelectorAll('.editable-field');
+            inputs.forEach(inp => {
+                inp.addEventListener('change', (e) => {
+                    const field = inp.dataset.field;
+                    const id = inp.dataset.id;
+                    let newVal = inp.value;
+                    if (field === 'sys' || field === 'dia' || field === 'hr') newVal = parseInt(newVal);
+                    updateRecord(activeDate, id, field, newVal);
+                });
+                if (inp.tagName === 'TEXTAREA') {
+                    inp.addEventListener('blur', () => updateRecord(activeDate, inp.dataset.id, inp.dataset.field, inp.value));
+                }
+            });
+            const delBtn = itemDiv.querySelector('.delete-record');
+            delBtn.addEventListener('click', () => deleteRecord(activeDate, rec.id));
+            recordsListDiv.appendChild(itemDiv);
+        });
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+    function updateStats() {
+        let total = 0, todayCount = 0, today = getTodayStr();
+        for (let d in masterData) { total += masterData[d].length; if (d === today) todayCount = masterData[d].length; }
+        statsPanel.innerHTML = `📊 总:${total} | 今日:${todayCount}`;
+    }
+
+    // ---------- Gist 操作 ----------
+    async function uploadToGistCore(showMsg=true) {
+        const token = gistToken || tokenInput.value.trim();
+        if (!token) throw new Error("Token缺失");
+        const content = JSON.stringify(masterData, null, 2);
+        const filename = "bp_records.json";
+        let url = "https://api.github.com/gists", method = "POST";
+        const currentGistId = gistId || gistIdInput.value.trim();
+        if (currentGistId) { url = `https://api.github.com/gists/${currentGistId}`; method = "PATCH"; }
+        const resp = await fetch(url, {
+            method, headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+            body: JSON.stringify({ description: "血压记录数据", public: false, files: { [filename]: { content } } })
+        });
+        if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`Gist ${resp.status}: ${errText}`);
+        }
+        const result = await resp.json();
+        if (!currentGistId && result.id) {
+            gistId = result.id;
+            gistIdInput.value = result.id;
+            localStorage.setItem("bp_gist_id", gistId);
+        }
+        if(showMsg) showStatus("已同步到Gist");
+        return result;
+    }
+
+    async function downloadFromGist() {
+        const token = gistToken || tokenInput.value.trim();
+        if (!token) throw new Error("请填写Token");
+        const currentGistId = gistId || gistIdInput.value.trim();
+        if (!currentGistId) throw new Error("请填写Gist ID");
+        const resp = await fetch(`https://api.github.com/gists/${currentGistId}`, { headers: { "Authorization": `token ${token}` } });
+        if (!resp.ok) throw new Error(`获取失败 ${resp.status}`);
+        const data = await resp.json();
+        const file = data.files["bp_records.json"];
+        if (!file || !file.content) throw new Error("Gist中无bp_records.json");
+        const remote = JSON.parse(file.content);
+        masterData = remote;
+        ensureTodayTabExists();
+        renderTabs();
+        updateStats();
+        showStatus("从Gist下载完成");
+        markDataChanged();
+    }
+
+    async function testConnection() {
+        const token = tokenInput.value.trim();
+        if (!token) throw new Error("输入Token");
+        const resp = await fetch("https://api.github.com/user", { headers: { "Authorization": `token ${token}` } });
+        if (!resp.ok) throw new Error("Token无效");
+        showStatus("连接成功");
+        return true;
+    }
+
+    // ---------- 导出导入 ----------
+    function exportToCSV() {
+        let rows = [];
+        for (let date in masterData) {
+            masterData[date].forEach(rec => {
+                rows.push({ date, time: rec.time, sys: rec.sys, dia: rec.dia, hr: rec.hr, pulsePressure: rec.pulsePressure, remark: rec.remark });
+            });
+        }
+        if (!rows.length) { showStatus("无数据", true); return; }
+        const headers = ["日期","时间","收缩压(mmHg)","舒张压(mmHg)","心率(bpm)","脉压差(mmHg)","备注"];
+        const csvRows = [headers.join(",")];
+        rows.forEach(r => {
+            csvRows.push(`"${r.date}","${r.time}","${r.sys}","${r.dia}","${r.hr}","${r.pulsePressure}","${(r.remark || '').replace(/"/g,'""')}"`);
+        });
+        const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {type:"text/csv;charset=utf-8;"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "血压记录.csv"; a.click(); URL.revokeObjectURL(a.href);
+        showStatus("导出CSV成功");
+    }
+
+    function exportToJSON() {
+        const blob = new Blob([JSON.stringify(masterData, null, 2)], {type:"application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "血压记录.json"; a.click(); URL.revokeObjectURL(a.href);
+        showStatus("导出JSON成功");
+    }
+
+    function importFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const content = e.target.result;
+                if (file.name.endsWith('.json')) {
+                    const parsed = JSON.parse(content);
+                    const fixed = importAndFixJson(parsed);
+                    if (Object.keys(fixed).length === 0) throw new Error("JSON无有效记录");
+                    masterData = fixed;
+                } else if (file.name.endsWith('.csv')) {
+                    const imported = parseCSVToMaster(content);
+                    if (Object.keys(imported).length === 0) throw new Error("CSV无有效数据");
+                    masterData = imported;
+                } else throw new Error("仅支持.json/.csv");
+                ensureTodayTabExists();
+                renderTabs();
+                updateStats();
+                markDataChanged();
+                showStatus(`导入成功，共 ${Object.keys(masterData).length} 天数据`);
+            } catch(err) { showStatus("导入失败: "+err.message, true); }
+        };
+        reader.readAsText(file, "UTF-8");
+    }
+
+    function parseCSVToMaster(csvText) {
+        const lines = csvText.split(/\r?\n/);
+        if (lines.length < 2) return {};
+        const headers = lines[0].split(",").map(h => h.replace(/"/g,'').trim());
+        const newMaster = {};
+        for (let i=1; i<lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const values = [];
+            let inQuote=false, cur='';
+            for(let ch of lines[i]) {
+                if(ch === '"') inQuote = !inQuote;
+                else if(ch === ',' && !inQuote) { values.push(cur); cur=''; }
+                else cur += ch;
+            }
+            values.push(cur);
+            const clean = values.map(v=>v.replace(/^"|"$/g,'').trim());
+            let rec = {};
+            headers.forEach((h,idx)=> rec[h]=clean[idx]);
+            let date = rec["日期"] || rec["date"];
+            let time = rec["时间"] || rec["time"];
+            let sys = parseInt(rec["收缩压(mmHg)"] || rec["sys"]);
+            let dia = parseInt(rec["舒张压(mmHg)"] || rec["dia"]);
+            let hr = parseInt(rec["心率(bpm)"] || rec["hr"]);
+            let remark = rec["备注"] || rec["remark"] || "";
+            if (date && !isNaN(sys) && !isNaN(dia) && !isNaN(hr) && sys>0 && dia>0 && hr>0) {
+                if (!newMaster[date]) newMaster[date] = [];
+                newMaster[date].push({ id: generateId(), time: time || "00:00:00", sys, dia, hr, pulsePressure: calcPulsePressure(sys,dia), remark });
+            }
+        }
+        return newMaster;
+    }
+
+    function saveConfigLocal() { 
+        const token = tokenInput.value.trim();
+        const gid = gistIdInput.value.trim();
+        localStorage.setItem("bp_token", token);
+        localStorage.setItem("bp_gist_id", gid);
+        gistToken = token;
+        gistId = gid;
+    }
+    function loadConfigLocal() { 
+        let t = localStorage.getItem("bp_token"), g = localStorage.getItem("bp_gist_id"); 
+        if(t) { tokenInput.value = t; gistToken = t; }
+        if(g) { gistIdInput.value = g; gistId = g; }
+    }
+
+    // 事件绑定
+    testConnBtn.onclick = () => withProgress("测试连接", async()=>{ await testConnection(); saveConfigLocal(); });
+    saveGistBtn.onclick = () => withProgress("保存到Gist", async()=>{ saveConfigLocal(); await uploadToGistCore(true); });
+    downloadGistBtn.onclick = () => withProgress("从Gist下载", async()=>{ saveConfigLocal(); await downloadFromGist(); });
+    exportCsvBtn.onclick = () => exportToCSV();
+    exportJsonBtn.onclick = () => exportToJSON();
+    uploadDataBtn.onclick = () => importFileInput.click();
+    importFileInput.onchange = (e) => { if(e.target.files[0]) importFile(e.target.files[0]); e.target.value=''; };
+    addRecordBtn.onclick = () => addRecordToCurrentTab();
+
+    window.onload = async () => {
+        loadConfigLocal();
+        if (gistToken && gistId) { 
+            try { await withProgress("自动下载Gist", ()=> downloadFromGist()); } 
+            catch(e) { console.warn(e); } 
+        }
+        if (Object.keys(masterData).length === 0) ensureTodayTabExists();
+        renderTabs();
+        updateStats();
+        [sysInput, diaInput, hrInput, remarkInput].forEach(inp => inp.addEventListener('input', ()=> markDataChanged()));
+    };
 </script>
 </body>
 </html>
