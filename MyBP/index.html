@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>智能血压记录仪 - 网格版</title>
+    <title>智能血压记录仪 - 标记版</title>
     <style>
         * {
             font-family: 'Trebuchet MS', '微软雅黑', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -114,20 +114,10 @@
             scrollbar-width: thin;
             scrollbar-color: #94a3b8 #e2e8f0;
         }
-        .tabs-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-        .tabs-wrapper::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
-        .tabs-wrapper::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 4px;
-        }
-        .tabs-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
+        .tabs-wrapper::-webkit-scrollbar { width: 6px; }
+        .tabs-wrapper::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 4px; }
+        .tabs-wrapper::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .tabs-wrapper::-webkit-scrollbar-thumb:hover { background: #64748b; }
         .tabs-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -137,7 +127,7 @@
         .tab-btn {
             background: #e2e8f0;
             color: #1e293b;
-            padding: 6px 8px;
+            padding: 6px 6px 6px 8px;
             border-radius: 20px;
             font-size: 12px;
             cursor: pointer;
@@ -149,33 +139,91 @@
             white-space: nowrap;
             min-width: 0;
             gap: 2px;
+            border: 2px solid transparent;
         }
         .tab-btn.active {
             background: #0f3b5c;
             color: white;
+        }
+        /* 标红的日期标签 */
+        .tab-btn.marked-red {
+            background: #fee2e2;
+            border: 2px solid #dc2626;
+            color: #991b1b;
+        }
+        .tab-btn.marked-red.active {
+            background: #b91c1c;
+            border-color: #7f1d1d;
+            color: white;
+        }
+        .tab-btn.marked-red .delete-tab-btn {
+            color: #b91c1c;
+        }
+        .tab-btn.marked-red.active .delete-tab-btn {
+            color: #fca5a5;
         }
         .tab-btn .tab-date {
             font-size: 11px;
             font-weight: 500;
             flex: 1;
             text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .tab-btn .tab-count {
             font-size: 9px;
             opacity: 0.7;
             background: rgba(0,0,0,0.08);
-            padding: 0 6px;
+            padding: 0 5px;
             border-radius: 10px;
             flex-shrink: 0;
         }
         .tab-btn.active .tab-count {
             background: rgba(255,255,255,0.2);
         }
+        .tab-btn.marked-red .tab-count {
+            background: rgba(220,38,38,0.15);
+        }
+        .tab-btn.marked-red.active .tab-count {
+            background: rgba(255,255,255,0.25);
+        }
+        /* 标记红点按钮 */
+        .mark-dot-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            line-height: 1;
+            color: #dc2626;
+            opacity: 0.45;
+            transition: 0.15s;
+        }
+        .mark-dot-btn:hover {
+            opacity: 1;
+        }
+        .tab-btn.marked-red .mark-dot-btn {
+            opacity: 1;
+            color: #b91c1c;
+        }
+        .tab-btn.active .mark-dot-btn {
+            color: #fca5a5;
+        }
+        .tab-btn.marked-red.active .mark-dot-btn {
+            color: #fee2e2;
+        }
         .delete-tab-btn {
             background: none;
             color: #dc2626;
             font-size: 12px;
-            padding: 0 2px;
+            padding: 0 1px;
             cursor: pointer;
             line-height: 1;
             flex-shrink: 0;
@@ -185,25 +233,14 @@
             color: #fca5a5;
             opacity: 0.8;
         }
-        .delete-tab-btn:hover {
-            opacity: 1 !important;
-        }
-        .tab-btn:hover {
-            background: #cbd5e1;
-        }
-        .tab-btn.active:hover {
-            background: #1e4a6b;
-        }
-        .no-tabs-msg {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #94a3b8;
-            padding: 20px 0;
-            font-size: 14px;
-        }
+        .delete-tab-btn:hover { opacity: 1 !important; }
+        .tab-btn:hover { background: #cbd5e1; }
+        .tab-btn.active:hover { background: #1e4a6b; }
+        .tab-btn.marked-red:hover { background: #fecaca; }
+        .tab-btn.marked-red.active:hover { background: #991b1b; }
         .tabs-footer {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             padding: 6px 4px 0 0;
             font-size: 11px;
             color: #94a3b8;
@@ -308,19 +345,15 @@
         .export-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .gist-download-btn { background: #2c6e2f; }
 
-        @media (max-width: 1200px) {
-            .tabs-grid { grid-template-columns: repeat(6, 1fr); }
-        }
-        @media (max-width: 900px) {
-            .tabs-grid { grid-template-columns: repeat(4, 1fr); }
-        }
+        @media (max-width: 1200px) { .tabs-grid { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 900px) { .tabs-grid { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 600px) {
             .tabs-grid { grid-template-columns: repeat(3, 1fr); }
             .add-form input, .add-form textarea { width: 100%; }
             .record-details { flex-direction: column; align-items: flex-start; }
             .standard-bar { flex-direction: column; gap: 8px; }
             .tabs-wrapper { max-height: 200px; padding: 8px; }
-            .tab-btn { font-size: 11px; padding: 4px 6px; }
+            .tab-btn { font-size: 11px; padding: 4px 4px 4px 6px; }
         }
     </style>
 </head>
@@ -344,7 +377,7 @@
         <div class="stats" id="statsPanel">📊 总:0 | 今日:0</div>
     </div>
 
-    <!-- 第二行：统一的参考标准栏 -->
+    <!-- 第二行：参考标准栏 -->
     <div class="standard-bar" id="standardBar">
         <div class="standard-item"><strong>🩺 血压</strong> 正常 &lt;120/80 | 1级 130-139/80-89 | 2级 ≥140/90</div>
         <div class="standard-item"><strong>❤️ 心率</strong> 60-100 bpm | 56岁↑男 60-90</div>
@@ -353,13 +386,12 @@
     </div>
 
     <div class="main-panel">
-        <!-- 标签页：网格布局，右侧滚动条 -->
+        <!-- 标签页 -->
         <div class="tabs-wrapper" id="tabsWrapper">
-            <div class="tabs-grid" id="tabsContainer">
-                <!-- 由JS动态渲染 -->
-            </div>
-            <div class="tabs-footer" id="tabsFooter">
+            <div class="tabs-grid" id="tabsContainer"></div>
+            <div class="tabs-footer">
                 <span id="tabInfo">共 0 个日期</span>
+                <span style="opacity:0.7;">● 点击圆点标记异常</span>
             </div>
         </div>
         <div class="record-card">
@@ -379,6 +411,7 @@
 
 <script>
     // ---------- 数据模型 ----------
+    // masterData 结构: { "2026-04-06": [ { id, time, sys, dia, hr, pulsePressure, remark } ], "__meta": { markedDates: [] } }
     let masterData = {};
     let activeDate = null;
     let gistToken = "", gistId = "";
@@ -407,7 +440,26 @@
     const remarkInput = document.getElementById('remarkInput');
     const statusMsgDiv = document.getElementById('statusMsg');
 
-    // 辅助函数
+    // ---------- 标红日期管理（存在 masterData.__meta）----------
+    function getMarkedDates() {
+        if (!masterData.__meta) masterData.__meta = {};
+        if (!masterData.__meta.markedDates) masterData.__meta.markedDates = [];
+        return masterData.__meta.markedDates;
+    }
+    function isDateMarked(dateKey) {
+        return getMarkedDates().includes(dateKey);
+    }
+    function toggleDateMark(dateKey) {
+        let marked = getMarkedDates();
+        const idx = marked.indexOf(dateKey);
+        if (idx === -1) marked.push(dateKey);
+        else marked.splice(idx, 1);
+        markDataChanged();
+        renderTabs();
+        showStatus(idx === -1 ? `已标记 ${dateKey} 为异常` : `已取消 ${dateKey} 标记`);
+    }
+
+    // ---------- 工具函数 ----------
     function showStatus(msg, isError = false) {
         statusMsgDiv.textContent = msg;
         statusMsgDiv.style.display = "block";
@@ -428,9 +480,7 @@
         }
     }
 
-    function markDataChanged() {
-        resetAutoUploadTimer();
-    }
+    function markDataChanged() { resetAutoUploadTimer(); }
 
     function resetAutoUploadTimer() {
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
@@ -449,17 +499,45 @@
     function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`; }
     function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 8); }
 
+    // 导出文件名用日期（YYYY-MM-DD）
+    function getDateStamp() {
+        const d = new Date();
+        return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+    }
+
+    // ★★★ 修复版 normalizeTime：兼容纯时间、日期+时间、ISO格式、毫秒等 ★★★
     function normalizeTime(timeStr) {
         if (!timeStr) return "00:00:00";
-        let parts = timeStr.split(' ');
-        if (parts.length < 2) return "00:00:00";
-        let timePart = parts[1];
-        if (timePart.includes(':')) {
-            let t = timePart.split(':');
-            let hour = t[0].padStart(2,'0');
-            let minute = t[1].padStart(2,'0');
-            let second = t[2] ? t[2].padStart(2,'0') : "00";
-            return `${hour}:${minute}:${second}`;
+        let str = String(timeStr).trim();
+        // 兼容 "2026/4/6 20:01:59" 格式：取空格后的时间部分
+        if (str.includes(' ')) {
+            const parts = str.split(/\s+/).filter(p => p.length > 0);
+            str = parts[parts.length - 1];
+        }
+        // 兼容 ISO 格式 "2026-04-06T20:01:59"
+        if (str.includes('T')) {
+            str = str.split('T').pop();
+        }
+        // 去掉时区后缀 Z 或 +08:00
+        if (str.includes('Z')) {
+            str = str.split('Z')[0];
+        }
+        if (/[+-]\d{2}:\d{2}$/.test(str)) {
+            str = str.replace(/[+-]\d{2}:\d{2}$/, '');
+        }
+        // 去掉毫秒
+        if (str.includes('.')) {
+            str = str.split('.')[0];
+        }
+        // 此时 str 应为 "HH:MM:SS" 或 "HH:MM"
+        const t = str.split(':');
+        if (t.length >= 2) {
+            const hour = String(t[0] || '0').padStart(2, '0').slice(-2);
+            const minute = String(t[1] || '0').padStart(2, '0').slice(-2);
+            const second = t[2] !== undefined ? String(t[2] || '0').padStart(2, '0').slice(-2) : '00';
+            if (!isNaN(hour) && !isNaN(minute) && !isNaN(second)) {
+                return `${hour}:${minute}:${second}`;
+            }
         }
         return "00:00:00";
     }
@@ -515,7 +593,12 @@
 
     function importAndFixJson(jsonObj) {
         let newMaster = {};
+        // 保留原有标红信息（兼容导出文件中的 __meta）
+        if (jsonObj.__meta && Array.isArray(jsonObj.__meta.markedDates)) {
+            newMaster.__meta = { markedDates: jsonObj.__meta.markedDates.slice() };
+        }
         for (let dateKey in jsonObj) {
+            if (dateKey === '__meta') continue;
             let records = jsonObj[dateKey];
             if (!Array.isArray(records)) continue;
             let fixedRecords = [];
@@ -608,7 +691,10 @@
             masterData[dateKey] = masterData[dateKey].filter(r => r.id !== recordId);
             if (masterData[dateKey].length === 0) {
                 delete masterData[dateKey];
-                const dates = Object.keys(masterData).sort().reverse();
+                const marked = getMarkedDates();
+                const mIdx = marked.indexOf(dateKey);
+                if (mIdx !== -1) marked.splice(mIdx, 1);
+                const dates = getDateKeys().sort().reverse();
                 activeDate = dates.length ? dates[0] : null;
                 renderTabs();
             } else {
@@ -623,7 +709,10 @@
     function deleteTab(dateKey) {
         if (masterData[dateKey]) {
             delete masterData[dateKey];
-            const dates = Object.keys(masterData).sort().reverse();
+            const marked = getMarkedDates();
+            const mIdx = marked.indexOf(dateKey);
+            if (mIdx !== -1) marked.splice(mIdx, 1);
+            const dates = getDateKeys().sort().reverse();
             activeDate = dates.length ? dates[0] : null;
             renderTabs();
             updateStats();
@@ -639,9 +728,13 @@
         renderTabs();
     }
 
+    function getDateKeys() {
+        return Object.keys(masterData).filter(k => k !== '__meta');
+    }
+
     // 核心：渲染网格标签页
     function renderTabs() {
-        const dates = Object.keys(masterData).sort();
+        const dates = getDateKeys().sort();
         tabsContainer.innerHTML = '';
         if (dates.length === 0) {
             const today = getTodayStr();
@@ -649,21 +742,25 @@
             activeDate = today;
             dates.push(today);
         }
-        // 为每个日期创建标签
         dates.forEach(date => {
+            const marked = isDateMarked(date);
             const tabDiv = document.createElement('div');
-            tabDiv.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
+            tabDiv.className = `tab-btn ${activeDate === date ? 'active' : ''} ${marked ? 'marked-red' : ''}`;
             tabDiv.dataset.date = date;
             const count = masterData[date] ? masterData[date].length : 0;
             tabDiv.innerHTML = `
                 <span class="tab-date">${date}</span>
                 <span class="tab-count">${count}</span>
-                <span class="delete-tab-btn" data-date="${date}">✕</span>
+                <button class="mark-dot-btn" data-date="${date}" title="${marked ? '取消标红' : '标记为异常'}">●</button>
+                <span class="delete-tab-btn" data-date="${date}" title="删除该日期">✕</span>
             `;
             tabDiv.addEventListener('click', (e) => {
                 if (e.target.classList.contains('delete-tab-btn')) {
                     e.stopPropagation();
                     deleteTab(date);
+                } else if (e.target.classList.contains('mark-dot-btn')) {
+                    e.stopPropagation();
+                    toggleDateMark(date);
                 } else {
                     activeDate = date;
                     renderTabs();
@@ -673,10 +770,8 @@
             tabsContainer.appendChild(tabDiv);
         });
 
-        // 更新底部信息
         tabInfo.textContent = `共 ${dates.length} 个日期`;
 
-        // 自动滚动到激活的标签位置（确保可见）
         const activeTab = tabsContainer.querySelector('.tab-btn.active');
         if (activeTab) {
             setTimeout(() => {
@@ -710,7 +805,7 @@
             `;
             const inputs = itemDiv.querySelectorAll('.editable-field');
             inputs.forEach(inp => {
-                inp.addEventListener('change', (e) => {
+                inp.addEventListener('change', () => {
                     const field = inp.dataset.field;
                     const id = inp.dataset.id;
                     let newVal = inp.value;
@@ -731,7 +826,11 @@
 
     function updateStats() {
         let total = 0, todayCount = 0, today = getTodayStr();
-        for (let d in masterData) { total += masterData[d].length; if (d === today) todayCount = masterData[d].length; }
+        for (let d in masterData) {
+            if (d === '__meta') continue;
+            total += masterData[d].length;
+            if (d === today) todayCount = masterData[d].length;
+        }
         statsPanel.innerHTML = `📊 总:${total} | 今日:${todayCount}`;
     }
 
@@ -773,7 +872,11 @@
         const file = data.files["bp_records.json"];
         if (!file || !file.content) throw new Error("Gist中无bp_records.json");
         const remote = JSON.parse(file.content);
-        masterData = remote;
+        if (!remote.__meta) remote.__meta = { markedDates: [] };
+        // 修复从 Gist 下载数据时也规范化时间
+        const fixed = importAndFixJson(remote);
+        if (!fixed.__meta) fixed.__meta = remote.__meta || { markedDates: [] };
+        masterData = fixed;
         ensureTodayTabExists();
         renderTabs();
         updateStats();
@@ -790,10 +893,11 @@
         return true;
     }
 
-    // ---------- 导出导入 ----------
+    // ---------- 导出（文件名自动带导出日期）----------
     function exportToCSV() {
         let rows = [];
         for (let date in masterData) {
+            if (date === '__meta') continue;
             masterData[date].forEach(rec => {
                 rows.push({ date, time: rec.time, sys: rec.sys, dia: rec.dia, hr: rec.hr, pulsePressure: rec.pulsePressure, remark: rec.remark });
             });
@@ -805,13 +909,21 @@
             csvRows.push(`"${r.date}","${r.time}","${r.sys}","${r.dia}","${r.hr}","${r.pulsePressure}","${(r.remark || '').replace(/"/g,'""')}"`);
         });
         const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {type:"text/csv;charset=utf-8;"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "血压记录.csv"; a.click(); URL.revokeObjectURL(a.href);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `血压记录_${getDateStamp()}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
         showStatus("导出CSV成功");
     }
 
     function exportToJSON() {
         const blob = new Blob([JSON.stringify(masterData, null, 2)], {type:"application/json"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "血压记录.json"; a.click(); URL.revokeObjectURL(a.href);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `血压记录_${getDateStamp()}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
         showStatus("导出JSON成功");
     }
 
@@ -823,28 +935,32 @@
                 if (file.name.endsWith('.json')) {
                     const parsed = JSON.parse(content);
                     const fixed = importAndFixJson(parsed);
-                    if (Object.keys(fixed).length === 0) throw new Error("JSON无有效记录");
+                    if (getDateKeysFromObj(fixed).length === 0) throw new Error("JSON无有效记录");
                     masterData = fixed;
                 } else if (file.name.endsWith('.csv')) {
                     const imported = parseCSVToMaster(content);
-                    if (Object.keys(imported).length === 0) throw new Error("CSV无有效数据");
+                    if (Object.keys(imported).filter(k=>k!=='__meta').length === 0) throw new Error("CSV无有效数据");
                     masterData = imported;
                 } else throw new Error("仅支持.json/.csv");
                 ensureTodayTabExists();
                 renderTabs();
                 updateStats();
                 markDataChanged();
-                showStatus(`导入成功，共 ${Object.keys(masterData).length} 天数据`);
+                showStatus(`导入成功，共 ${getDateKeys().length} 天数据`);
             } catch(err) { showStatus("导入失败: "+err.message, true); }
         };
         reader.readAsText(file, "UTF-8");
+    }
+
+    function getDateKeysFromObj(obj) {
+        return Object.keys(obj).filter(k => k !== '__meta');
     }
 
     function parseCSVToMaster(csvText) {
         const lines = csvText.split(/\r?\n/);
         if (lines.length < 2) return {};
         const headers = lines[0].split(",").map(h => h.replace(/"/g,'').trim());
-        const newMaster = {};
+        const newMaster = { __meta: { markedDates: [] } };
         for (let i=1; i<lines.length; i++) {
             if (!lines[i].trim()) continue;
             const values = [];
@@ -866,13 +982,19 @@
             let remark = rec["备注"] || rec["remark"] || "";
             if (date && !isNaN(sys) && !isNaN(dia) && !isNaN(hr) && sys>0 && dia>0 && hr>0) {
                 if (!newMaster[date]) newMaster[date] = [];
-                newMaster[date].push({ id: generateId(), time: time || "00:00:00", sys, dia, hr, pulsePressure: calcPulsePressure(sys,dia), remark });
+                newMaster[date].push({
+                    id: generateId(),
+                    time: time ? normalizeTime(time) : "00:00:00",
+                    sys, dia, hr,
+                    pulsePressure: calcPulsePressure(sys,dia),
+                    remark
+                });
             }
         }
         return newMaster;
     }
 
-    function saveConfigLocal() { 
+    function saveConfigLocal() {
         const token = tokenInput.value.trim();
         const gid = gistIdInput.value.trim();
         localStorage.setItem("bp_token", token);
@@ -880,8 +1002,8 @@
         gistToken = token;
         gistId = gid;
     }
-    function loadConfigLocal() { 
-        let t = localStorage.getItem("bp_token"), g = localStorage.getItem("bp_gist_id"); 
+    function loadConfigLocal() {
+        let t = localStorage.getItem("bp_token"), g = localStorage.getItem("bp_gist_id");
         if(t) { tokenInput.value = t; gistToken = t; }
         if(g) { gistIdInput.value = g; gistId = g; }
     }
@@ -898,11 +1020,12 @@
 
     window.onload = async () => {
         loadConfigLocal();
-        if (gistToken && gistId) { 
-            try { await withProgress("自动下载Gist", ()=> downloadFromGist()); } 
-            catch(e) { console.warn(e); } 
+        if (gistToken && gistId) {
+            try { await withProgress("自动下载Gist", ()=> downloadFromGist()); }
+            catch(e) { console.warn(e); }
         }
-        if (Object.keys(masterData).length === 0) ensureTodayTabExists();
+        if (!masterData.__meta) masterData.__meta = { markedDates: [] };
+        if (getDateKeys().length === 0) ensureTodayTabExists();
         renderTabs();
         updateStats();
         [sysInput, diaInput, hrInput, remarkInput].forEach(inp => inp.addEventListener('input', ()=> markDataChanged()));
