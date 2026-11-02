@@ -154,6 +154,15 @@
             background: #0f3b5c;
             color: white;
         }
+        /* 红色标记样式 */
+        .tab-btn.marked {
+            background: #fecdd3 !important;
+            color: #991b1b !important;
+        }
+        .tab-btn.active.marked {
+            background: #9b2c2c !important;
+            color: white !important;
+        }
         .tab-btn .tab-date {
             font-size: 11px;
             font-weight: 500;
@@ -380,6 +389,7 @@
 <script>
     // ---------- 数据模型 ----------
     let masterData = {};
+    let markedDates = {}; // 新增：红色标记日期 { "2026-11-02": true }
     let activeDate = null;
     let gistToken = "", gistId = "";
     let autoSaveTimer = null;
@@ -449,6 +459,23 @@
     function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`; }
     function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 8); }
 
+    // 判断某日期是否存在超标血压
+    function isDateAbnormal(date) {
+        if (!masterData[date]) return false;
+        return masterData[date].some(r => r.sys >= 140 || r.dia >= 90);
+    }
+    // 切换日期红色标记
+    function toggleMarkDate(date) {
+        if (markedDates[date]) {
+            delete markedDates[date];
+        } else {
+            markedDates[date] = true;
+        }
+        renderTabs();
+        markDataChanged();
+        showStatus(markedDates[date] ? `${date} 已标记红色` : `${date} 取消红色标记`);
+    }
+
     function normalizeTime(timeStr) {
         if (!timeStr) return "00:00:00";
         let parts = timeStr.split(' ');
@@ -515,6 +542,11 @@
 
     function importAndFixJson(jsonObj) {
         let newMaster = {};
+        // 读取标记
+        if (jsonObj._markedDates) {
+            markedDates = JSON.parse(JSON.stringify(jsonObj._markedDates));
+            delete jsonObj._markedDates;
+        }
         for (let dateKey in jsonObj) {
             let records = jsonObj[dateKey];
             if (!Array.isArray(records)) continue;
@@ -575,6 +607,7 @@
         masterData[activeDate].push(newRecord);
         masterData[activeDate].sort((a,b)=> a.time.localeCompare(b.time));
         renderCurrentTabRecords();
+        renderTabs();
         updateStats();
         remarkInput.value = "";
         sysInput.value = "120";
@@ -598,6 +631,7 @@
         if (updated.sys <= 0 || updated.dia <= 0 || updated.hr <= 0) { showStatus("数值必须>0", true); return; }
         records[idx] = updated;
         renderCurrentTabRecords();
+        renderTabs();
         updateStats();
         markDataChanged();
         showStatus("已更新");
@@ -608,12 +642,11 @@
             masterData[dateKey] = masterData[dateKey].filter(r => r.id !== recordId);
             if (masterData[dateKey].length === 0) {
                 delete masterData[dateKey];
+                delete markedDates[dateKey];
                 const dates = Object.keys(masterData).sort().reverse();
                 activeDate = dates.length ? dates[0] : null;
-                renderTabs();
-            } else {
-                renderCurrentTabRecords();
             }
+            renderTabs();
             updateStats();
             markDataChanged();
             showStatus("已删除记录");
@@ -623,6 +656,7 @@
     function deleteTab(dateKey) {
         if (masterData[dateKey]) {
             delete masterData[dateKey];
+            delete markedDates[dateKey];
             const dates = Object.keys(masterData).sort().reverse();
             activeDate = dates.length ? dates[0] : null;
             renderTabs();
@@ -652,7 +686,8 @@
         // 为每个日期创建标签
         dates.forEach(date => {
             const tabDiv = document.createElement('div');
-            tabDiv.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
+            const isMarked = !!markedDates[date];
+            tabDiv.className = `tab-btn ${activeDate === date ? 'active' : ''} ${isMarked ? 'marked' : ''}`;
             tabDiv.dataset.date = date;
             const count = masterData[date] ? masterData[date].length : 0;
             tabDiv.innerHTML = `
@@ -664,6 +699,10 @@
                 if (e.target.classList.contains('delete-tab-btn')) {
                     e.stopPropagation();
                     deleteTab(date);
+                } else if (e.target.classList.contains('tab-date')) {
+                    // 点击日期文字：切换红色标记
+                    e.stopPropagation();
+                    toggleMarkDate(date);
                 } else {
                     activeDate = date;
                     renderTabs();
@@ -739,7 +778,10 @@
     async function uploadToGistCore(showMsg=true) {
         const token = gistToken || tokenInput.value.trim();
         if (!token) throw new Error("Token缺失");
-        const content = JSON.stringify(masterData, null, 2);
+        // 打包标记数据
+        const exportData = JSON.parse(JSON.stringify(masterData));
+        exportData._markedDates = markedDates;
+        const content = JSON.stringify(exportData, null, 2);
         const filename = "bp_records.json";
         let url = "https://api.github.com/gists", method = "POST";
         const currentGistId = gistId || gistIdInput.value.trim();
@@ -773,7 +815,7 @@
         const file = data.files["bp_records.json"];
         if (!file || !file.content) throw new Error("Gist中无bp_records.json");
         const remote = JSON.parse(file.content);
-        masterData = remote;
+        masterData = importAndFixJson(remote);
         ensureTodayTabExists();
         renderTabs();
         updateStats();
@@ -810,8 +852,16 @@
     }
 
     function exportToJSON() {
-        const blob = new Blob([JSON.stringify(masterData, null, 2)], {type:"application/json"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "血压记录.json"; a.click(); URL.revokeObjectURL(a.href);
+        const exportData = JSON.parse(JSON.stringify(masterData));
+        exportData._markedDates = markedDates;
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:"application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        // 文件名带上导出日期
+        const exportDate = getTodayStr();
+        a.download = `血压记录_${exportDate}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
         showStatus("导出JSON成功");
     }
 
